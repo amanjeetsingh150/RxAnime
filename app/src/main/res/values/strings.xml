@@ -1,10 +1,12 @@
 <resources>
     <string name="app_name">RxAnime</string>
-    <string name="filter_operator">Filter</string>
+    <string name="filter_operator">Filter (filter even emissions)</string>
     <string name="filter_operator_desc">emit only those items from an Observable that pass a predicate test.</string>
-    <string name="take_operator">Take</string>
+    <string name="filter_operator_link">http://reactivex.io/documentation/operators/filter.html</string>
+    <string name="take_operator">Take(3)</string>
     <string name="take_operator_desc">emits only the first n items emitted by an Observable.</string>
-    <string name="skip_operator">Skip</string>
+    <string name="take_operator_link">http://reactivex.io/documentation/operators/take.html</string>
+    <string name="skip_operator">Skip(3)</string>
     <string name="skip_operator_desc">suppress the first n items emitted by an Observable.</string>
-
+    <string name="skip_operator_link">http://reactivex.io/documentation/operators/skip.html</string>
 </resources>

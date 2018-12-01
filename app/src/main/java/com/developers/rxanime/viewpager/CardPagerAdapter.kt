@@ -20,6 +20,7 @@ class CardPagerAdapter : PagerAdapter() {
     private lateinit var cardView: CardView
     private lateinit var operatorTitleTextView: TextView
     private lateinit var operatorDescriptionTextView: TextView
+    private lateinit var operatorHtmlLinkTextView: TextView
 
 
     fun addItem(cardItem: CardItem) {
@@ -39,15 +40,17 @@ class CardPagerAdapter : PagerAdapter() {
         container.addView(view)
         cardView = view.findViewById(R.id.cardView)
         operatorTitleTextView = view.findViewById(R.id.operatorName)
+        operatorHtmlLinkTextView = view.findViewById(R.id.operatorHtmlLink)
         operatorDescriptionTextView = view.findViewById(R.id.operatorDescription)
         if (position > 0) {
             view.findViewById<StreamView>(R.id.streamView).setShouldReset(true)
         }
-        if(position==0){
+        if (position == 0) {
             view.findViewById<StreamView>(R.id.streamView).init()
         }
         cardView.maxCardElevation = baseElevation * MAX_ELEVATION_FACTOR
         operatorTitleTextView.text = dataList[position].operatorName
+        operatorHtmlLinkTextView.text = dataList[position].operatorHtmlLink
         operatorDescriptionTextView.text = dataList[position].operatorDescription
         return view
     }

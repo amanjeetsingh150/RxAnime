@@ -22,11 +22,11 @@ class MainActivity : AppCompatActivity() {
         cardPagerAdapter = CardPagerAdapter()
 
         cardPagerAdapter.addItem(CardItem(getString(R.string.take_operator), getString(R.string.take_operator_desc),
-                StreamView(this)))
+                getString(R.string.take_operator_link), StreamView(this)))
         cardPagerAdapter.addItem(CardItem(getString(R.string.filter_operator), getString(R.string.filter_operator_desc),
-                StreamView(this)))
+                getString(R.string.filter_operator_link), StreamView(this)))
         cardPagerAdapter.addItem(CardItem(getString(R.string.skip_operator), getString(R.string.skip_operator_desc),
-                StreamView(this)))
+                getString(R.string.skip_operator_link), StreamView(this)))
 
         viewPager.pageMargin = dpToPixels(5, this).toInt()
         viewPager.setPageTransformer(false, CardsPagerTransformerBasic(5, 10, 0.6f))
