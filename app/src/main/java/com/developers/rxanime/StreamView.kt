@@ -23,6 +23,7 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
     private var takeOperatorEmissionList = mutableListOf<EmissionCircleData>()
     private var filterOperatorEmissionList = mutableListOf<EmissionCircleData>()
     private var skipOperatorEmissionList = mutableListOf<EmissionCircleData>()
+    private var mapOperatorEmissionList = mutableListOf<EmissionCircleData>()
     private var startPoint = 0f
     private var count = 0
     private var isAnimated = false
@@ -36,6 +37,7 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
     private var canShowTakeOperator = false
     private var canShowFilterOperator = false
     private var canShowSkipOperator = false
+    private var canShowMapOperator = false
     private var isResetNeeded = false
     private var isAnimating = false
 
@@ -86,6 +88,7 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
         canShowSkipOperator = getCanShowSkipOperator()
         canShowTakeOperator = getCanShowTakeOperator()
         canShowFilterOperator = getCanShowFilterOperator()
+        canShowMapOperator = getCanShowMapOperator()
 
         if (!isAnimated && !isAnimating) {
             postDelayed({ animateStreamMarbles() }, 300)
@@ -120,14 +123,14 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
             canvas?.drawLine(width.div(2).toFloat() + differenceOfSecondLineFromCenter, getDimensionInPixel(10).toFloat(), width.div(2).toFloat() + differenceOfSecondLineFromCenter, height.toFloat(), paintLeftLine)
             canvas?.drawCircle(width.div(2).toFloat() - differenceOfFirstLineFromCenter, initialCircleY, circleRadius.toFloat(), leftCirclePaint)
         }
-        if (canShowTakeOperator) {
-            drawTakeOperator(canvas)
-        } else if (canShowFilterOperator) {
-            drawFilterOperator(canvas)
-        } else if (canShowSkipOperator) {
-            drawSkipOperator(canvas)
-        } else {
-            //Do nothing
+        when {
+            canShowTakeOperator -> drawTakeOperator(canvas)
+            canShowFilterOperator -> drawFilterOperator(canvas)
+            canShowSkipOperator -> drawSkipOperator(canvas)
+            canShowMapOperator -> drawMapOperator(canvas)
+            else -> {
+                //Do nothing
+            }
         }
         if (shouldDrawMarbleEmission && count < 5 && !isResetNeeded) {
             drawMovingMarbleEmission(canvas)
@@ -180,6 +183,16 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
         }
     }
 
+    private fun drawMapOperator(canvas: Canvas?) {
+        if (!mapOperatorEmissionList.isEmpty()) {
+            for (i in 0..mapOperatorEmissionList.size) {
+                if (mapOperatorEmissionList.getOrNull(i) != null && !isResetNeeded) {
+                    canvas?.drawLine(width.div(2).toFloat() - differenceOfFirstLineFromCenter, mapOperatorEmissionList[i].cy, width.div(2).toFloat() + differenceOfSecondLineFromCenter, mapOperatorEmissionList[i].cy, paintLeftLine)
+                }
+            }
+        }
+    }
+
     private fun animateStreamMarbles() {
         isAnimated = false
         isAnimating = true
@@ -221,8 +234,12 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
                         takeOperatorEmissionList.add(emissionCircleList[count]!!)
                     } else if (count % 2 == 0 && canShowFilterOperator) {
                         filterOperatorEmissionList.add(emissionCircleList[count]!!)
-                    } else if (count > 2) {
+                    } else if (count > 2 && canShowSkipOperator) {
                         skipOperatorEmissionList.add(emissionCircleList[count]!!)
+                    } else if (canShowMapOperator) {
+                        val mappedEmissionData = emissionCircleList[count]!!.data * 2
+                        val mappedEmission = EmissionCircleData(width.div(2).toFloat() - differenceOfFirstLineFromCenter, startPoint, mappedEmissionData)
+                        mapOperatorEmissionList.add(mappedEmission)
                     }
                     animatorSet.start()
                     animatorSet.addListener(this@StreamView)
@@ -270,7 +287,7 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
         this.canShowTakeOperator = canShowTakeOperator
     }
 
-    fun getCanShowTakeOperator(): Boolean {
+    private fun getCanShowTakeOperator(): Boolean {
         return canShowTakeOperator
     }
 
@@ -288,6 +305,14 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
 
     private fun getCanShowFilterOperator(): Boolean {
         return canShowFilterOperator
+    }
+
+    fun setCanShowMapOperatorAnimation(canShowMapOperator: Boolean) {
+        this.canShowMapOperator = canShowMapOperator
+    }
+
+    private fun getCanShowMapOperator(): Boolean {
+        return canShowMapOperator
     }
 
     fun setShouldReset(isResetNeeded: Boolean) {

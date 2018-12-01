@@ -4,11 +4,14 @@ import android.content.Context
 import android.os.Bundle
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.TextView
 import com.developers.rxanime.model.CardItem
 import com.developers.rxanime.viewpager.CardPagerAdapter
 import com.developers.rxanime.viewpager.CardsPagerTransformerBasic
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.emmision_card_layout.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -35,11 +38,11 @@ class MainActivity : AppCompatActivity() {
         viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
 
             override fun onPageScrollStateChanged(position: Int) {
-
+                //Do nothing
             }
 
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-
+                //Do nothing
             }
 
             override fun onPageSelected(position: Int) {
@@ -75,4 +78,25 @@ class MainActivity : AppCompatActivity() {
         return dp * context.resources.displayMetrics.density
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        return when (item?.itemId) {
+            R.id.transforming_operators -> {
+                addTransFormingOperatorsToModel()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun addTransFormingOperatorsToModel() {
+        cardPagerAdapter.addItem(CardItem(getString(R.string.map_operator), getString(R.string.map_operator_desc),
+                getString(R.string.map_operator_link), streamView))
+        cardPagerAdapter.addItem(CardItem(getString(R.string.buffer_operator), getString(R.string.buffer_operator_desc),
+                getString(R.string.buffer_operator_link), streamView))
+    }
 }

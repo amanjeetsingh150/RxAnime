@@ -27,6 +27,10 @@ class CardPagerAdapter : PagerAdapter() {
         dataList.add(cardItem)
     }
 
+    fun cleatItems() {
+        dataList.clear()
+    }
+
     override fun isViewFromObject(view: View, anyObject: Any): Boolean {
         return view == anyObject
     }
