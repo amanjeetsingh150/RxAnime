@@ -221,7 +221,7 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
                         takeOperatorEmissionList.add(emissionCircleList[count]!!)
                     } else if (count % 2 == 0 && canShowFilterOperator) {
                         filterOperatorEmissionList.add(emissionCircleList[count]!!)
-                    } else if (count > 3) {
+                    } else if (count > 2) {
                         skipOperatorEmissionList.add(emissionCircleList[count]!!)
                     }
                     animatorSet.start()
