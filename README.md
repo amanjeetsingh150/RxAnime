@@ -10,7 +10,14 @@ Operators done:
 <LI>Skip</LI>
 </UL>
 
-Inspired by: https://reactive.how/
+<b>More to come:</b> map,scan, takeLast...
 
-<b>Developed by:</b>
+<h2>Pull requests</h2>
+I encourage all the developers out there to contribute to the repository and help me to expand it. To contribute just think up of an operator and the visualization, code it and raise PR.
+<br>
+
+<h2>Developed by</h2>
 <a href="https://github.com/amanjeetsingh150">Amanjeet Singh</a>
+
+<h2>Inspired by<h2>
+https://reactive.how/
