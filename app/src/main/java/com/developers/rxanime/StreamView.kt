@@ -11,6 +11,7 @@ import android.view.animation.LinearInterpolator
 import android.util.TypedValue
 import android.util.DisplayMetrics
 import android.graphics.*
+import android.util.Log
 import com.developers.rxanime.model.EmissionCircleData
 
 
@@ -118,6 +119,7 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         shouldReset(canvas)
+        Log.d("StreamView", canShowMapOperator.toString())
         if (!isResetNeeded) {
             canvas?.drawLine(width.div(2).toFloat() - differenceOfFirstLineFromCenter, getDimensionInPixel(10).toFloat(), width.div(2).toFloat() - differenceOfFirstLineFromCenter, height.toFloat(), paintLeftLine)
             canvas?.drawLine(width.div(2).toFloat() + differenceOfSecondLineFromCenter, getDimensionInPixel(10).toFloat(), width.div(2).toFloat() + differenceOfSecondLineFromCenter, height.toFloat(), paintLeftLine)
@@ -188,6 +190,7 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
             for (i in 0..mapOperatorEmissionList.size) {
                 if (mapOperatorEmissionList.getOrNull(i) != null && !isResetNeeded) {
                     canvas?.drawLine(width.div(2).toFloat() - differenceOfFirstLineFromCenter, mapOperatorEmissionList[i].cy, width.div(2).toFloat() + differenceOfSecondLineFromCenter, mapOperatorEmissionList[i].cy, paintLeftLine)
+                    drawEmissionCircle(canvas, mapOperatorEmissionList[i].data, width.div(2).toFloat() + differenceOfSecondLineFromCenter, mapOperatorEmissionList[i].cy)
                 }
             }
         }
@@ -312,6 +315,7 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
     }
 
     private fun getCanShowMapOperator(): Boolean {
+        Log.d("StraeamView","Show "+canShowMapOperator)
         return canShowMapOperator
     }
 

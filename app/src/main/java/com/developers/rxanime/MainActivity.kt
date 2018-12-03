@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
@@ -68,6 +69,13 @@ class MainActivity : AppCompatActivity() {
                         streamView.setCanShowSkipOperatorAnimation(false)
                         streamView.init()
                     }
+                    operatorTitle.text == getString(R.string.map_operator) -> {
+                        streamView.setCanShowMapOperatorAnimation(true)
+                        streamView.setCanShowFilterOperatorAnimation(false)
+                        streamView.setCanShowTakeOperatorAnimation(false)
+                        streamView.setCanShowSkipOperatorAnimation(false)
+                        streamView.init()
+                    }
                 }
 
             }
@@ -86,6 +94,11 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when (item?.itemId) {
             R.id.transforming_operators -> {
+                cardPagerAdapter.cleatItems()
+                streamView.setCanShowMapOperatorAnimation(true)
+                streamView.setCanShowFilterOperatorAnimation(false)
+                streamView.setCanShowTakeOperatorAnimation(false)
+                streamView.setCanShowSkipOperatorAnimation(false)
                 addTransFormingOperatorsToModel()
                 true
             }
@@ -94,9 +107,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addTransFormingOperatorsToModel() {
+        Log.d("Main","Refereshing")
         cardPagerAdapter.addItem(CardItem(getString(R.string.map_operator), getString(R.string.map_operator_desc),
                 getString(R.string.map_operator_link), streamView))
         cardPagerAdapter.addItem(CardItem(getString(R.string.buffer_operator), getString(R.string.buffer_operator_desc),
                 getString(R.string.buffer_operator_link), streamView))
+        cardPagerAdapter.notifyDataSetChanged()
     }
 }

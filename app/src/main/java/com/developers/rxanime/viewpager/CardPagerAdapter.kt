@@ -59,5 +59,11 @@ class CardPagerAdapter : PagerAdapter() {
         return view
     }
 
+    override fun getItemPosition(anyObject: Any): Int {
+        return POSITION_NONE
+    }
 
+    override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
+
+    }
 }
