@@ -5,6 +5,7 @@ import android.animation.AnimatorSet
 import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.AttributeSet
 import android.view.View
 import android.view.animation.LinearInterpolator
@@ -41,6 +42,9 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
     private var canShowMapOperator = false
     private var isResetNeeded = false
     private var isAnimating = false
+    private var shouldShowTransformingOperators = false
+    private var shouldShowFilteringOperators = false
+    private lateinit var sharedPreferences: SharedPreferences
 
     private val differenceOfFirstLineFromCenter = getDimensionInPixel(100)
     private val differenceOfSecondLineFromCenter = getDimensionInPixel(100)
@@ -68,7 +72,17 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
         textPaint.textAlign = Paint.Align.CENTER
 
         textPaint.getTextBounds("0", 0, 1, bounds)
-        canShowTakeOperator = true
+        sharedPreferences = context.getSharedPreferences(MainActivity.RX_PREFERENCE_NAME, Context.MODE_PRIVATE)
+        shouldShowFilteringOperators = sharedPreferences.getBoolean(MainActivity.FILTER_OPERATOR_SHOW, false)
+        shouldShowTransformingOperators = sharedPreferences.getBoolean(MainActivity.TRANSFORMING_OPERATOR_SHOW, false)
+        when {
+            shouldShowTransformingOperators -> {
+                canShowMapOperator = true
+            }
+            shouldShowFilteringOperators -> {
+                canShowTakeOperator = true
+            }
+        }
     }
 
     constructor(context: Context) : this(context, attributeSet = null)
@@ -119,19 +133,26 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         shouldReset(canvas)
-        Log.d("StreamView", canShowMapOperator.toString())
         if (!isResetNeeded) {
             canvas?.drawLine(width.div(2).toFloat() - differenceOfFirstLineFromCenter, getDimensionInPixel(10).toFloat(), width.div(2).toFloat() - differenceOfFirstLineFromCenter, height.toFloat(), paintLeftLine)
             canvas?.drawLine(width.div(2).toFloat() + differenceOfSecondLineFromCenter, getDimensionInPixel(10).toFloat(), width.div(2).toFloat() + differenceOfSecondLineFromCenter, height.toFloat(), paintLeftLine)
             canvas?.drawCircle(width.div(2).toFloat() - differenceOfFirstLineFromCenter, initialCircleY, circleRadius.toFloat(), leftCirclePaint)
         }
-        when {
-            canShowTakeOperator -> drawTakeOperator(canvas)
-            canShowFilterOperator -> drawFilterOperator(canvas)
-            canShowSkipOperator -> drawSkipOperator(canvas)
-            canShowMapOperator -> drawMapOperator(canvas)
-            else -> {
-                //Do nothing
+        if (shouldShowFilteringOperators) {
+            when {
+                canShowTakeOperator -> drawTakeOperator(canvas)
+                canShowFilterOperator -> drawFilterOperator(canvas)
+                canShowSkipOperator -> drawSkipOperator(canvas)
+                else -> {
+                    //Do nothing
+                }
+            }
+        } else if (shouldShowTransformingOperators) {
+            when {
+                canShowMapOperator -> drawMapOperator(canvas)
+                else -> {
+
+                }
             }
         }
         if (shouldDrawMarbleEmission && count < 5 && !isResetNeeded) {
@@ -315,7 +336,6 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
     }
 
     private fun getCanShowMapOperator(): Boolean {
-        Log.d("StraeamView","Show "+canShowMapOperator)
         return canShowMapOperator
     }
 
@@ -327,6 +347,22 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
         if (isResetNeeded) {
             canvas?.drawColor(Color.WHITE)
         }
+    }
+
+    fun setShouldShowFilterOperators(shouldShowFilterOperators: Boolean) {
+        this.shouldShowFilteringOperators = shouldShowFilterOperators
+    }
+
+    private fun getShouldShowFilterOperators(): Boolean {
+        return shouldShowFilteringOperators
+    }
+
+    fun setShouldShowTransformingOperators(shouldShowTransformOperators: Boolean) {
+        this.shouldShowTransformingOperators = shouldShowTransformOperators
+    }
+
+    private fun getShouldShowTransformOperators(): Boolean {
+        return shouldShowTransformingOperators
     }
 
     override fun onAnimationEnd(animation: Animator?) {
