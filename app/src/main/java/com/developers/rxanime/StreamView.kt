@@ -26,8 +26,10 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
     private var filterOperatorEmissionList = mutableListOf<EmissionCircleData>()
     private var skipOperatorEmissionList = mutableListOf<EmissionCircleData>()
     private var mapOperatorEmissionList = mutableListOf<EmissionCircleData>()
+    private var bufferOperatorEmissionList = mutableListOf<EmissionCircleData>()
     private var startPoint = 0f
     private var count = 0
+    private var bufferCount = 0
     private var isAnimated = false
     private var shouldDrawMarbleEmission = false
 
@@ -40,11 +42,12 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
     private var canShowFilterOperator = false
     private var canShowSkipOperator = false
     private var canShowMapOperator = false
+    private var canShowBufferOperator = false
     private var isResetNeeded = false
     private var isAnimating = false
     private var shouldShowTransformingOperators = false
     private var shouldShowFilteringOperators = false
-    private lateinit var sharedPreferences: SharedPreferences
+    private var sharedPreferences: SharedPreferences
 
     private val differenceOfFirstLineFromCenter = getDimensionInPixel(100)
     private val differenceOfSecondLineFromCenter = getDimensionInPixel(100)
@@ -94,17 +97,22 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
         circleRadius = getDimensionInPixel(10)
         shouldDrawMarbleEmission = false
         count = 0
+        bufferCount = 0
 
         emissionCircleList.clear()
         takeOperatorEmissionList.clear()
         skipOperatorEmissionList.clear()
         filterOperatorEmissionList.clear()
+        mapOperatorEmissionList.clear()
+        bufferOperatorEmissionList.clear()
 
+        shouldShowTransformingOperators = getShouldShowTransformOperators()
+        shouldShowFilteringOperators = getShouldShowFilterOperators()
         canShowSkipOperator = getCanShowSkipOperator()
         canShowTakeOperator = getCanShowTakeOperator()
         canShowFilterOperator = getCanShowFilterOperator()
         canShowMapOperator = getCanShowMapOperator()
-
+        canShowBufferOperator = getCanShowBufferOperator()
         if (!isAnimated && !isAnimating) {
             postDelayed({ animateStreamMarbles() }, 300)
         }
@@ -150,6 +158,7 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
         } else if (shouldShowTransformingOperators) {
             when {
                 canShowMapOperator -> drawMapOperator(canvas)
+                canShowBufferOperator -> drawBufferOperator(canvas)
                 else -> {
 
                 }
@@ -201,6 +210,20 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
             for (i in 0..filterOperatorEmissionList.size) {
                 if (filterOperatorEmissionList.getOrNull(index = i) != null && !isResetNeeded) {
                     canvas?.drawLine(width.div(2).toFloat() - differenceOfFirstLineFromCenter, filterOperatorEmissionList[i].cy, width.div(2).toFloat() + differenceOfSecondLineFromCenter, filterOperatorEmissionList[i].cy, paintLeftLine)
+                }
+            }
+        }
+    }
+
+    private fun drawBufferOperator(canvas: Canvas?) {
+        if (!bufferOperatorEmissionList.isEmpty()) {
+            for (i in 0..bufferOperatorEmissionList.size) {
+                if (bufferOperatorEmissionList.getOrNull(i) != null && !isResetNeeded && i > 0 && i % 2 != 0) {
+                    canvas?.drawLine(width.div(2).toFloat() - differenceOfFirstLineFromCenter, bufferOperatorEmissionList[i].cy, width.div(2).toFloat() + differenceOfSecondLineFromCenter, bufferOperatorEmissionList[i].cy, paintLeftLine)
+                    val emissionBufferPrevious = bufferOperatorEmissionList[i - 1].copy()
+                    val emissionBufferCurrent = bufferOperatorEmissionList[i].copy()
+                    drawEmissionCircle(canvas, emissionBufferPrevious.data, width.div(2).toFloat() + differenceOfSecondLineFromCenter - getDimensionInPixel(16), emissionBufferCurrent.cy)
+                    drawEmissionCircle(canvas, emissionBufferCurrent.data, width.div(2).toFloat() + differenceOfSecondLineFromCenter + getDimensionInPixel(16), emissionBufferCurrent.cy)
                 }
             }
         }
@@ -264,6 +287,13 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
                         val mappedEmissionData = emissionCircleList[count]!!.data * 2
                         val mappedEmission = EmissionCircleData(width.div(2).toFloat() - differenceOfFirstLineFromCenter, startPoint, mappedEmissionData)
                         mapOperatorEmissionList.add(mappedEmission)
+                    } else if (canShowBufferOperator) {
+                        //Current and next
+                        bufferCount += 1
+                        if (bufferCount % 2 == 0) {
+                            bufferOperatorEmissionList.add(emissionCircleList[count - 1]!!)
+                            bufferOperatorEmissionList.add(emissionCircleList[count]!!)
+                        }
                     }
                     animatorSet.start()
                     animatorSet.addListener(this@StreamView)
@@ -323,6 +353,10 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
         return canShowSkipOperator
     }
 
+    private fun getCanShowBufferOperator(): Boolean {
+        return canShowBufferOperator
+    }
+
     fun setCanShowFilterOperatorAnimation(canShowFilterOperator: Boolean) {
         this.canShowFilterOperator = canShowFilterOperator
     }
@@ -365,6 +399,10 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
         return shouldShowTransformingOperators
     }
 
+    fun setCanShowBufferOperatorAnimation(canShowBufferOperator: Boolean) {
+        this.canShowBufferOperator = canShowBufferOperator
+    }
+
     override fun onAnimationEnd(animation: Animator?) {
         if (count >= MAX_EMISSION_COUNT) {
             isAnimating = false
@@ -382,4 +420,5 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
     override fun onAnimationCancel(animation: Animator?) {
 
     }
+
 }

@@ -28,7 +28,7 @@ class CardPagerAdapter : PagerAdapter() {
     }
 
     fun cleatItems() {
-        dataList.clear()
+        this.dataList.clear()
     }
 
     override fun isViewFromObject(view: View, anyObject: Any): Boolean {
@@ -64,6 +64,6 @@ class CardPagerAdapter : PagerAdapter() {
     }
 
     override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
-
+        container.removeView(`object` as View)
     }
 }

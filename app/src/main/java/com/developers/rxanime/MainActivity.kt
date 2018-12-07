@@ -59,32 +59,43 @@ class MainActivity : AppCompatActivity() {
                 streamView.setShouldReset(false)
                 when {
                     operatorTitle.text == getString(R.string.take_operator) -> {
+                        streamView.setShouldShowFilterOperators(true)
                         streamView.setCanShowTakeOperatorAnimation(true)
                         streamView.setCanShowSkipOperatorAnimation(false)
                         streamView.setCanShowFilterOperatorAnimation(false)
                         streamView.init()
                     }
                     operatorTitle.text == getString(R.string.skip_operator) -> {
+                        streamView.setShouldShowFilterOperators(true)
                         streamView.setCanShowSkipOperatorAnimation(true)
                         streamView.setCanShowFilterOperatorAnimation(false)
                         streamView.setCanShowTakeOperatorAnimation(false)
                         streamView.init()
                     }
                     operatorTitle.text == getString(R.string.filter_operator) -> {
+                        streamView.setShouldShowFilterOperators(true)
                         streamView.setCanShowFilterOperatorAnimation(true)
                         streamView.setCanShowTakeOperatorAnimation(false)
                         streamView.setCanShowSkipOperatorAnimation(false)
                         streamView.init()
                     }
                     operatorTitle.text == getString(R.string.map_operator) -> {
+                        streamView.setShouldShowTransformingOperators(true)
                         streamView.setCanShowMapOperatorAnimation(true)
                         streamView.setCanShowFilterOperatorAnimation(false)
                         streamView.setCanShowTakeOperatorAnimation(false)
                         streamView.setCanShowSkipOperatorAnimation(false)
+                        streamView.setCanShowBufferOperatorAnimation(false)
                         streamView.init()
                     }
                     operatorTitle.text == getString(R.string.buffer_operator) -> {
-                        //TODO
+                        streamView.setShouldShowTransformingOperators(true)
+                        streamView.setCanShowBufferOperatorAnimation(true)
+                        streamView.setCanShowMapOperatorAnimation(false)
+                        streamView.setCanShowFilterOperatorAnimation(false)
+                        streamView.setCanShowTakeOperatorAnimation(false)
+                        streamView.setCanShowSkipOperatorAnimation(false)
+                        streamView.init()
                     }
                 }
 
