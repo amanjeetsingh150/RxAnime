@@ -8,9 +8,11 @@ Operators done:
 <LI>Filter</LI>
 <LI>Take</LI>
 <LI>Skip</LI>
+<LI>Map</LI>
+<LI>Buffer</LI>
 </UL>
 
-<b>More to come:</b> map,scan, takeLast...
+<b>More to come:</b>Scan, takeLast, flatMap, etc...
 
 <h2>Pull requests</h2>
 I encourage all the developers out there to contribute to the repository and help me to expand it. To contribute just think up of an operator and the visualization, code it and raise PR.
