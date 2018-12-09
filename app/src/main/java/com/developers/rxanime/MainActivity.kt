@@ -32,17 +32,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setupPreferences()
         cardPagerAdapter = CardPagerAdapter()
-
-        cardPagerAdapter.addItem(CardItem(getString(R.string.take_operator), getString(R.string.take_operator_desc),
-                getString(R.string.take_operator_link), StreamView(this)))
-        cardPagerAdapter.addItem(CardItem(getString(R.string.filter_operator), getString(R.string.filter_operator_desc),
-                getString(R.string.filter_operator_link), StreamView(this)))
-        cardPagerAdapter.addItem(CardItem(getString(R.string.skip_operator), getString(R.string.skip_operator_desc),
-                getString(R.string.skip_operator_link), StreamView(this)))
-        viewPager.pageMargin = dpToPixels(5, this).toInt()
-        viewPager.setPageTransformer(false, CardsPagerTransformerBasic(5, 10, 0.6f))
-        viewPager.adapter = cardPagerAdapter
-        viewPager.offscreenPageLimit = 1
+        setupInitialOperators(cardPagerAdapter)
+        with(viewPager) {
+            pageMargin = dpToPixels(5, this@MainActivity).toInt()
+            setPageTransformer(false, CardsPagerTransformerBasic(5, 10, 0.6f))
+            adapter = cardPagerAdapter
+            offscreenPageLimit = 1
+        }
         viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
 
             override fun onPageScrollStateChanged(position: Int) {
@@ -59,48 +55,50 @@ class MainActivity : AppCompatActivity() {
                 streamView.setShouldReset(false)
                 when {
                     operatorTitle.text == getString(R.string.take_operator) -> {
-                        streamView.setShouldShowFilterOperators(true)
-                        streamView.setCanShowTakeOperatorAnimation(true)
-                        streamView.setCanShowSkipOperatorAnimation(false)
-                        streamView.setCanShowFilterOperatorAnimation(false)
-                        streamView.init()
+                        toggleOperatorsOnView(streamView, false, true,
+                                false, false, false)
                     }
                     operatorTitle.text == getString(R.string.skip_operator) -> {
-                        streamView.setShouldShowFilterOperators(true)
-                        streamView.setCanShowSkipOperatorAnimation(true)
-                        streamView.setCanShowFilterOperatorAnimation(false)
-                        streamView.setCanShowTakeOperatorAnimation(false)
-                        streamView.init()
+                        toggleOperatorsOnView(streamView, false, false,
+                                true, false, false)
                     }
                     operatorTitle.text == getString(R.string.filter_operator) -> {
-                        streamView.setShouldShowFilterOperators(true)
-                        streamView.setCanShowFilterOperatorAnimation(true)
-                        streamView.setCanShowTakeOperatorAnimation(false)
-                        streamView.setCanShowSkipOperatorAnimation(false)
-                        streamView.init()
+                        toggleOperatorsOnView(streamView, true, false,
+                                false, false, false)
                     }
                     operatorTitle.text == getString(R.string.map_operator) -> {
-                        streamView.setShouldShowTransformingOperators(true)
-                        streamView.setCanShowMapOperatorAnimation(true)
-                        streamView.setCanShowFilterOperatorAnimation(false)
-                        streamView.setCanShowTakeOperatorAnimation(false)
-                        streamView.setCanShowSkipOperatorAnimation(false)
-                        streamView.setCanShowBufferOperatorAnimation(false)
-                        streamView.init()
+                        toggleOperatorsOnView(streamView, false, false,
+                                false, true, false)
                     }
                     operatorTitle.text == getString(R.string.buffer_operator) -> {
-                        streamView.setShouldShowTransformingOperators(true)
-                        streamView.setCanShowBufferOperatorAnimation(true)
-                        streamView.setCanShowMapOperatorAnimation(false)
-                        streamView.setCanShowFilterOperatorAnimation(false)
-                        streamView.setCanShowTakeOperatorAnimation(false)
-                        streamView.setCanShowSkipOperatorAnimation(false)
-                        streamView.init()
+                        toggleOperatorsOnView(streamView, false, false,
+                                false, false, true)
                     }
                 }
 
             }
         })
+    }
+
+    private fun setupInitialOperators(cardPagerAdapter: CardPagerAdapter) {
+        cardPagerAdapter.addItem(CardItem(getString(R.string.take_operator), getString(R.string.take_operator_desc),
+                getString(R.string.take_operator_link), StreamView(this)))
+        cardPagerAdapter.addItem(CardItem(getString(R.string.filter_operator), getString(R.string.filter_operator_desc),
+                getString(R.string.filter_operator_link), StreamView(this)))
+        cardPagerAdapter.addItem(CardItem(getString(R.string.skip_operator), getString(R.string.skip_operator_desc),
+                getString(R.string.skip_operator_link), StreamView(this)))
+    }
+
+    private fun toggleOperatorsOnView(streamView: StreamView, shouldShowFilter: Boolean, shouldShowTake: Boolean, shouldShowSkip: Boolean,
+                                      shouldShowMap: Boolean, shouldShowBuffer: Boolean) {
+        with(streamView) {
+            setCanShowTakeOperatorAnimation(shouldShowTake)
+            setCanShowFilterOperatorAnimation(shouldShowFilter)
+            setCanShowSkipOperatorAnimation(shouldShowSkip)
+            setCanShowMapOperatorAnimation(shouldShowMap)
+            setCanShowBufferOperatorAnimation(shouldShowBuffer)
+            init()
+        }
     }
 
     private fun dpToPixels(dp: Int, context: Context): Float {
@@ -125,21 +123,16 @@ class MainActivity : AppCompatActivity() {
             R.id.transforming_operators -> {
                 changePreferences(false, true)
                 cardPagerAdapter.cleatItems()
-                streamView.setCanShowMapOperatorAnimation(true)
-                streamView.setCanShowFilterOperatorAnimation(false)
-                streamView.setCanShowTakeOperatorAnimation(false)
-                streamView.setCanShowSkipOperatorAnimation(false)
+                toggleOperatorsOnView(streamView, false, false,
+                        false, true, false)
                 addTransFormingOperatorsToModel()
                 true
             }
             R.id.filtering_operators -> {
                 changePreferences(true, false)
                 cardPagerAdapter.cleatItems()
-                streamView.setCanShowBufferOperatorAnimation(false)
-                streamView.setCanShowMapOperatorAnimation(false)
-                streamView.setCanShowFilterOperatorAnimation(false)
-                streamView.setCanShowTakeOperatorAnimation(true)
-                streamView.setCanShowSkipOperatorAnimation(false)
+                toggleOperatorsOnView(streamView, false, true
+                        , false, false, false)
                 addFilteringOperatorsToModel()
                 true
             }
