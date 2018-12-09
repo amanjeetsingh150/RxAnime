@@ -123,7 +123,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when (item?.itemId) {
             R.id.transforming_operators -> {
-                changePreferences()
+                changePreferences(false, true)
                 cardPagerAdapter.cleatItems()
                 streamView.setCanShowMapOperatorAnimation(true)
                 streamView.setCanShowFilterOperatorAnimation(false)
@@ -132,14 +132,36 @@ class MainActivity : AppCompatActivity() {
                 addTransFormingOperatorsToModel()
                 true
             }
+            R.id.filtering_operators -> {
+                changePreferences(true, false)
+                cardPagerAdapter.cleatItems()
+                streamView.setCanShowBufferOperatorAnimation(false)
+                streamView.setCanShowMapOperatorAnimation(false)
+                streamView.setCanShowFilterOperatorAnimation(false)
+                streamView.setCanShowTakeOperatorAnimation(true)
+                streamView.setCanShowSkipOperatorAnimation(false)
+                addFilteringOperatorsToModel()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    private fun changePreferences() {
+    private fun addFilteringOperatorsToModel() {
+        cardPagerAdapter.addItem(CardItem(getString(R.string.take_operator), getString(R.string.take_operator_desc),
+                getString(R.string.take_operator_link), StreamView(this)))
+        cardPagerAdapter.addItem(CardItem(getString(R.string.filter_operator), getString(R.string.filter_operator_desc),
+                getString(R.string.filter_operator_link), StreamView(this)))
+        cardPagerAdapter.addItem(CardItem(getString(R.string.skip_operator), getString(R.string.skip_operator_desc),
+                getString(R.string.skip_operator_link), StreamView(this)))
+        cardPagerAdapter.notifyDataSetChanged()
+        viewPager.currentItem = 0
+    }
+
+    private fun changePreferences(showFilterOperators: Boolean, showTransformingOperators: Boolean) {
         val editor = sharedPreferences.edit()
-        editor.putBoolean(FILTER_OPERATOR_SHOW, false)
-        editor.putBoolean(TRANSFORMING_OPERATOR_SHOW, true)
+        editor.putBoolean(FILTER_OPERATOR_SHOW, showFilterOperators)
+        editor.putBoolean(TRANSFORMING_OPERATOR_SHOW, showTransformingOperators)
         editor.apply()
     }
 
@@ -149,6 +171,6 @@ class MainActivity : AppCompatActivity() {
         cardPagerAdapter.addItem(CardItem(getString(R.string.buffer_operator), getString(R.string.buffer_operator_desc),
                 getString(R.string.buffer_operator_link), streamView))
         cardPagerAdapter.notifyDataSetChanged()
-        viewPager.setCurrentItem(0)
+        viewPager.currentItem = 0
     }
 }

@@ -3,4 +3,7 @@
     <item
         android:id="@+id/transforming_operators"
         android:title="@string/transforming_operators_category" />
+    <item
+        android:id="@+id/filtering_operators"
+        android:title="@string/filtering_operators"/>
 </menu>

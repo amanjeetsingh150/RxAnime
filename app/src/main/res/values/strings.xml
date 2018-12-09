@@ -10,10 +10,11 @@
     <string name="skip_operator_desc">suppress the first n items emitted by an Observable.</string>
     <string name="skip_operator_link">http://reactivex.io/documentation/operators/skip.html</string>
     <string name="transforming_operators_category">Transforming operators</string>
-    <string name="map_operator">Map</string>
+    <string name="map_operator">Map (it-> it*2)</string>
     <string name="map_operator_desc">transforms the items emitted by an Observable by applying a function to each item.</string>
     <string name="map_operator_link">http://reactivex.io/documentation/operators/map.html</string>
-    <string name="buffer_operator">Buffer</string>
+    <string name="buffer_operator">Buffer(2)</string>
     <string name="buffer_operator_desc">periodically gather items from an Observable into bundles and emit these bundles rather than emitting the items one at a time.</string>
     <string name="buffer_operator_link">http://reactivex.io/documentation/operators/buffer.html</string>
+    <string name="filtering_operators">Filtering Operators</string>
 </resources>
