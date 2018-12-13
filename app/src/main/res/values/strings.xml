@@ -6,6 +6,9 @@
     <string name="take_operator">Take(3)</string>
     <string name="take_operator_desc">emits only the first n items emitted by an Observable.</string>
     <string name="take_operator_link">http://reactivex.io/documentation/operators/take.html</string>
+    <string name="take_last_operator">TakeLast(2)</string>
+    <string name="take_last_operator_desc">emits only the last n items emitted by an Observable.</string>
+    <string name="take_last_operator_link">http://reactivex.io/documentation/operators/takelast.html</string>
     <string name="skip_operator">Skip(3)</string>
     <string name="skip_operator_desc">suppress the first n items emitted by an Observable.</string>
     <string name="skip_operator_link">http://reactivex.io/documentation/operators/skip.html</string>

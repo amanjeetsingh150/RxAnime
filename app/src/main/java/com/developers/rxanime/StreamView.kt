@@ -23,6 +23,7 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
     private var circleRadius = 0
     private var emissionCircleList = mutableListOf<EmissionCircleData?>()
     private var takeOperatorEmissionList = mutableListOf<EmissionCircleData>()
+    private var takeLastOperatorEmissionList = mutableListOf<EmissionCircleData>()
     private var filterOperatorEmissionList = mutableListOf<EmissionCircleData>()
     private var skipOperatorEmissionList = mutableListOf<EmissionCircleData>()
     private var mapOperatorEmissionList = mutableListOf<EmissionCircleData>()
@@ -37,8 +38,8 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
     private var leftCirclePaint = Paint()
     private var circlePaint = Paint()
     private var textPaint = Paint()
-    private val bounds = Rect()
     private var canShowTakeOperator = false
+    private var canShowTakeLastOperator = false
     private var canShowFilterOperator = false
     private var canShowSkipOperator = false
     private var canShowMapOperator = false
@@ -48,12 +49,13 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
     private var shouldShowTransformingOperators = false
     private var shouldShowFilteringOperators = false
     private var sharedPreferences: SharedPreferences
+    private val bounds = Rect()
 
     private val differenceOfFirstLineFromCenter = getDimensionInPixel(100)
     private val differenceOfSecondLineFromCenter = getDimensionInPixel(100)
 
     companion object {
-        private val MAX_EMISSION_COUNT = 5
+        private const val MAX_EMISSION_COUNT = 5
     }
 
     init {
@@ -101,6 +103,7 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
 
         emissionCircleList.clear()
         takeOperatorEmissionList.clear()
+        takeLastOperatorEmissionList.clear()
         skipOperatorEmissionList.clear()
         filterOperatorEmissionList.clear()
         mapOperatorEmissionList.clear()
@@ -110,6 +113,7 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
         shouldShowFilteringOperators = getShouldShowFilterOperators()
         canShowSkipOperator = getCanShowSkipOperator()
         canShowTakeOperator = getCanShowTakeOperator()
+        canShowTakeLastOperator = getCanShowTakeLastOperator()
         canShowFilterOperator = getCanShowFilterOperator()
         canShowMapOperator = getCanShowMapOperator()
         canShowBufferOperator = getCanShowBufferOperator()
@@ -149,6 +153,7 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
         if (shouldShowFilteringOperators) {
             when {
                 canShowTakeOperator -> drawTakeOperator(canvas)
+                canShowTakeLastOperator -> drawTakeLastOperator(canvas)
                 canShowFilterOperator -> drawFilterOperator(canvas)
                 canShowSkipOperator -> drawSkipOperator(canvas)
                 else -> {
@@ -190,6 +195,16 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
             for (i in 0..takeOperatorEmissionList.size) {
                 if (takeOperatorEmissionList.getOrNull(index = i) != null && !isResetNeeded) {
                     canvas?.drawLine(width.div(2).toFloat() - differenceOfFirstLineFromCenter, takeOperatorEmissionList[i].cy, width.div(2).toFloat() + differenceOfSecondLineFromCenter, takeOperatorEmissionList[i].cy, paintLeftLine)
+                }
+            }
+        }
+    }
+
+    private fun drawTakeLastOperator(canvas: Canvas?) {
+        if (!takeLastOperatorEmissionList.isEmpty()) {
+            for (i in 0..takeLastOperatorEmissionList.size) {
+                if (takeLastOperatorEmissionList.getOrNull(index = i) != null && !isResetNeeded) {
+                    canvas?.drawLine(width.div(2).toFloat() - differenceOfFirstLineFromCenter, takeLastOperatorEmissionList[i].cy, width.div(2).toFloat() + differenceOfSecondLineFromCenter, takeLastOperatorEmissionList[i].cy, paintLeftLine)
                 }
             }
         }
@@ -279,6 +294,8 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
                     propertyValueHolderYAnimation.setFloatValues(startPoint, endVal)
                     if (count < 3 && canShowTakeOperator) {
                         takeOperatorEmissionList.add(emissionCircleList[count]!!)
+                    } else if (count > 2 && canShowTakeLastOperator) {
+                        takeLastOperatorEmissionList.add(emissionCircleList[count]!!)
                     } else if (count % 2 == 0 && canShowFilterOperator) {
                         filterOperatorEmissionList.add(emissionCircleList[count]!!)
                     } else if (count > 2 && canShowSkipOperator) {
@@ -343,6 +360,14 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
 
     private fun getCanShowTakeOperator(): Boolean {
         return canShowTakeOperator
+    }
+
+    fun setCanShowTakeLastOperatorAnimation(canShowTakeLastOperator: Boolean) {
+        this.canShowTakeLastOperator = canShowTakeLastOperator
+    }
+
+    private fun getCanShowTakeLastOperator(): Boolean {
+        return canShowTakeLastOperator
     }
 
     fun setCanShowSkipOperatorAnimation(canShowSkipOperator: Boolean) {

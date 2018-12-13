@@ -22,9 +22,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sharedPreferences: SharedPreferences
 
     companion object {
-        val RX_PREFERENCE_NAME = "RX_PREFERENCES"
-        val FILTER_OPERATOR_SHOW = "FILTER_OPERATORS"
-        val TRANSFORMING_OPERATOR_SHOW = "TRANSFORM_OPERATORS"
+        const val RX_PREFERENCE_NAME = "RX_PREFERENCES"
+        const val FILTER_OPERATOR_SHOW = "FILTER_OPERATORS"
+        const val TRANSFORMING_OPERATOR_SHOW = "TRANSFORM_OPERATORS"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,23 +55,27 @@ class MainActivity : AppCompatActivity() {
                 streamView.setShouldReset(false)
                 when {
                     operatorTitle.text == getString(R.string.take_operator) -> {
-                        toggleOperatorsOnView(streamView, false, true,
+                        toggleOperatorsOnView(streamView, false, true, false,
+                                false, false, false)
+                    }
+                    operatorTitle.text == getString(R.string.take_last_operator) -> {
+                        toggleOperatorsOnView(streamView, false, false, true,
                                 false, false, false)
                     }
                     operatorTitle.text == getString(R.string.skip_operator) -> {
-                        toggleOperatorsOnView(streamView, false, false,
+                        toggleOperatorsOnView(streamView, false, false, false,
                                 true, false, false)
                     }
                     operatorTitle.text == getString(R.string.filter_operator) -> {
-                        toggleOperatorsOnView(streamView, true, false,
+                        toggleOperatorsOnView(streamView, true, false, false,
                                 false, false, false)
                     }
                     operatorTitle.text == getString(R.string.map_operator) -> {
-                        toggleOperatorsOnView(streamView, false, false,
+                        toggleOperatorsOnView(streamView, false, false, false,
                                 false, true, false)
                     }
                     operatorTitle.text == getString(R.string.buffer_operator) -> {
-                        toggleOperatorsOnView(streamView, false, false,
+                        toggleOperatorsOnView(streamView, false, false, false,
                                 false, false, true)
                     }
                 }
@@ -83,16 +87,19 @@ class MainActivity : AppCompatActivity() {
     private fun setupInitialOperators(cardPagerAdapter: CardPagerAdapter) {
         cardPagerAdapter.addItem(CardItem(getString(R.string.take_operator), getString(R.string.take_operator_desc),
                 getString(R.string.take_operator_link), StreamView(this)))
+        cardPagerAdapter.addItem(CardItem(getString(R.string.take_last_operator), getString(R.string.take_last_operator_desc),
+                getString(R.string.take_last_operator_link), StreamView(this)))
         cardPagerAdapter.addItem(CardItem(getString(R.string.filter_operator), getString(R.string.filter_operator_desc),
                 getString(R.string.filter_operator_link), StreamView(this)))
         cardPagerAdapter.addItem(CardItem(getString(R.string.skip_operator), getString(R.string.skip_operator_desc),
                 getString(R.string.skip_operator_link), StreamView(this)))
     }
 
-    private fun toggleOperatorsOnView(streamView: StreamView, shouldShowFilter: Boolean, shouldShowTake: Boolean, shouldShowSkip: Boolean,
-                                      shouldShowMap: Boolean, shouldShowBuffer: Boolean) {
+    private fun toggleOperatorsOnView(streamView: StreamView, shouldShowFilter: Boolean, shouldShowTake: Boolean, shouldShowTakeLast: Boolean,
+                                      shouldShowSkip: Boolean, shouldShowMap: Boolean, shouldShowBuffer: Boolean) {
         with(streamView) {
             setCanShowTakeOperatorAnimation(shouldShowTake)
+            setCanShowTakeLastOperatorAnimation(shouldShowTakeLast)
             setCanShowFilterOperatorAnimation(shouldShowFilter)
             setCanShowSkipOperatorAnimation(shouldShowSkip)
             setCanShowMapOperatorAnimation(shouldShowMap)
@@ -123,7 +130,7 @@ class MainActivity : AppCompatActivity() {
             R.id.transforming_operators -> {
                 changePreferences(false, true)
                 cardPagerAdapter.cleatItems()
-                toggleOperatorsOnView(streamView, false, false,
+                toggleOperatorsOnView(streamView, false, false, false,
                         false, true, false)
                 addTransFormingOperatorsToModel()
                 true
@@ -131,8 +138,8 @@ class MainActivity : AppCompatActivity() {
             R.id.filtering_operators -> {
                 changePreferences(true, false)
                 cardPagerAdapter.cleatItems()
-                toggleOperatorsOnView(streamView, false, true
-                        , false, false, false)
+                toggleOperatorsOnView(streamView, false, true, false,
+                        false, false, false)
                 addFilteringOperatorsToModel()
                 true
             }
