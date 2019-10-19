@@ -1,12 +1,12 @@
 package com.developers.rxanime.viewpager
 
 import android.os.Build
-import android.support.annotation.RequiresApi
-import android.support.v4.view.ViewPager
+import androidx.annotation.RequiresApi
+import androidx.viewpager.widget.ViewPager
 import android.view.View
 
 
-class CardsPagerTransformerBasic(private val baseElevation: Int, private val raisingElevation: Int, private val smallerScale: Float) : ViewPager.PageTransformer {
+class CardsPagerTransformerBasic(private val baseElevation: Int, private val raisingElevation: Int, private val smallerScale: Float) : androidx.viewpager.widget.ViewPager.PageTransformer {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun transformPage(page: View, position: Float) {

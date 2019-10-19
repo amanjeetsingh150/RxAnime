@@ -1,7 +1,7 @@
 package com.developers.rxanime.viewpager
 
-import android.support.v4.view.PagerAdapter
-import android.support.v7.widget.CardView
+import androidx.viewpager.widget.PagerAdapter
+import androidx.cardview.widget.CardView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -11,13 +11,13 @@ import com.developers.rxanime.R
 import com.developers.rxanime.StreamView
 import com.developers.rxanime.model.CardItem
 
-class CardPagerAdapter : PagerAdapter() {
+class CardPagerAdapter : androidx.viewpager.widget.PagerAdapter() {
 
 
     private var baseElevation = 4f
     private var MAX_ELEVATION_FACTOR = 8
     private var dataList = mutableListOf<CardItem>()
-    private lateinit var cardView: CardView
+    private lateinit var cardView: androidx.cardview.widget.CardView
     private lateinit var operatorTitleTextView: TextView
     private lateinit var operatorDescriptionTextView: TextView
     private lateinit var operatorHtmlLinkTextView: TextView

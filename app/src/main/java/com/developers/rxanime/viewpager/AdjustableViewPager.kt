@@ -1,7 +1,7 @@
 package com.developers.rxanime.viewpager
 
 import android.content.Context
-import android.support.v4.view.ViewPager
+import androidx.viewpager.widget.ViewPager
 import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.util.Log
@@ -9,7 +9,7 @@ import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 
-class AdjustableViewPager(context: Context, attributeSet: AttributeSet?) : ViewPager(context, attributeSet) {
+class AdjustableViewPager(context: Context, attributeSet: AttributeSet?) : androidx.viewpager.widget.ViewPager(context, attributeSet) {
 
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
