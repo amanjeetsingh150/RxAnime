@@ -7,18 +7,22 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager.widget.ViewPager
 import com.developers.rxanime.model.CardItem
 import com.developers.rxanime.viewpager.CardPagerAdapter
 import com.developers.rxanime.viewpager.CardsPagerTransformerBasic
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.emmision_card_layout.*
+import java.io.IOException
+import java.nio.charset.Charset
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var cardPagerAdapter: CardPagerAdapter
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var mainViewModel: MainViewModel
 
     companion object {
         const val RX_PREFERENCE_NAME = "RX_PREFERENCES"
@@ -29,6 +33,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        mainViewModel.fetchCategories(loadJSONFromAsset())
         setupPreferences()
         cardPagerAdapter = CardPagerAdapter()
         setupInitialOperators(cardPagerAdapter)
@@ -107,6 +113,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun loadJSONFromAsset(): String {
+        var json: String? = null
+        try {
+            val displayJsonStream = assets.open("display_operators.json")
+            val size = displayJsonStream.available()
+            val buffer = ByteArray(size)
+            displayJsonStream.read(buffer)
+            displayJsonStream.close()
+            json = String(buffer, Charset.defaultCharset())
+        } catch (ex: IOException) {
+            ex.printStackTrace()
+            return ""
+        }
+
+        return json
+    }
     private fun dpToPixels(dp: Int, context: Context): Float {
         return dp * context.resources.displayMetrics.density
     }
