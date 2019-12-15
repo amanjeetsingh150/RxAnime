@@ -1,13 +1,24 @@
 package com.developers.rxanime.model
 
-import com.developers.rxanime.BaseView
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 
-enum class OperatorCategory(name: String) {
-    @Json(name = "Filtering") FILTER("Filter"),
-    @Json(name = "Transforming") TRANSFORMING("Transforming")
+enum class OperatorCategory {
+    @Json(name = "Filtering")
+    FILTER{
+        override fun getOperators(): Operator {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+    },
+    @Json(name = "Transforming")
+    TRANSFORMING{
+        override fun getOperators(): Operator {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+    };
+
+    abstract fun getOperators(): Operator
 }
 
 @JsonClass(generateAdapter = true)

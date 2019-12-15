@@ -10,8 +10,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager.widget.ViewPager
 import com.developers.rxanime.model.CardItem
+import com.developers.rxanime.model.OperatorCategory
 import com.developers.rxanime.viewpager.CardPagerAdapter
 import com.developers.rxanime.viewpager.CardsPagerTransformerBasic
+import com.jakewharton.rxbinding2.support.v4.view.RxViewPager
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.emmision_card_layout.*
 import java.io.IOException
@@ -24,17 +29,28 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var mainViewModel: MainViewModel
 
+    private val disposable = CompositeDisposable()
+
     companion object {
         const val RX_PREFERENCE_NAME = "RX_PREFERENCES"
         const val FILTER_OPERATOR_SHOW = "FILTER_OPERATORS"
         const val TRANSFORMING_OPERATOR_SHOW = "TRANSFORM_OPERATORS"
+        private const val CURRENT_SELECTION = "CURRENT_OPERATOR_CATEGORY"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-        mainViewModel.fetchCategories(loadJSONFromAsset())
+        val displayData = mainViewModel.fetchCategories(loadJSONFromAsset())
+        val categoryList = displayData?.displayData
+
+        disposable += RxViewPager.pageSelections(viewPager)
+                .subscribe({ position ->
+                    // get current selection
+                }, {})
+
+
         setupPreferences()
         cardPagerAdapter = CardPagerAdapter()
         setupInitialOperators(cardPagerAdapter)
@@ -114,7 +130,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadJSONFromAsset(): String {
-        var json: String? = null
+        val json: String?
         try {
             val displayJsonStream = assets.open("display_operators.json")
             val size = displayJsonStream.available()
@@ -129,6 +145,7 @@ class MainActivity : AppCompatActivity() {
 
         return json
     }
+
     private fun dpToPixels(dp: Int, context: Context): Float {
         return dp * context.resources.displayMetrics.density
     }
@@ -149,6 +166,8 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when (item?.itemId) {
             R.id.transforming_operators -> {
+                val editor = sharedPreferences.edit()
+                editor.putString(CURRENT_SELECTION, OperatorCategory.TRANSFORMING.toString())
                 changePreferences(false, true)
                 cardPagerAdapter.cleatItems()
                 toggleOperatorsOnView(streamView, false, false, false,
@@ -194,4 +213,5 @@ class MainActivity : AppCompatActivity() {
         cardPagerAdapter.notifyDataSetChanged()
         viewPager.currentItem = 0
     }
+
 }
