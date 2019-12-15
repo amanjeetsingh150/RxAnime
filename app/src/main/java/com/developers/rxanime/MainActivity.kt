@@ -10,7 +10,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager.widget.ViewPager
 import com.developers.rxanime.model.CardItem
+import com.developers.rxanime.model.FilterOperator
 import com.developers.rxanime.model.OperatorCategory
+import com.developers.rxanime.model.Transforming
+import com.developers.rxanime.util.getOperator
 import com.developers.rxanime.viewpager.CardPagerAdapter
 import com.developers.rxanime.viewpager.CardsPagerTransformerBasic
 import com.jakewharton.rxbinding2.support.v4.view.RxViewPager
@@ -47,11 +50,31 @@ class MainActivity : AppCompatActivity() {
 
         disposable += RxViewPager.pageSelections(viewPager)
                 .subscribe({ position ->
-                    // get current selection
+                    // get current selection and index
+                    val currentSelection = sharedPreferences.getString(CURRENT_SELECTION, OperatorCategory.FILTER.toString())
+                    val currentCategoryIndex = OperatorCategory.valueOf(currentSelection!!).ordinal
+
+                    // get current category and its operators
+                    val currentCategory = categoryList?.get(currentCategoryIndex)
+                    val operators = currentCategory?.operators
+
+                    when (OperatorCategory.valueOf(currentSelection)) {
+
+                        OperatorCategory.FILTER -> {
+                            val selectedOperatorList = operators?.let {
+                                val currentOperatorName = it[position].name.getOperator<FilterOperator>()
+
+                            }
+
+                        }
+                        OperatorCategory.TRANSFORMING -> {
+                            val selectedOperatorList = operators?.let {
+                                val currentOperatorName = it[position].name.getOperator<Transforming>()
+                            }
+                        }
+                    }
                 }, {})
 
-
-        setupPreferences()
         cardPagerAdapter = CardPagerAdapter()
         setupInitialOperators(cardPagerAdapter)
         with(viewPager) {
@@ -148,14 +171,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun dpToPixels(dp: Int, context: Context): Float {
         return dp * context.resources.displayMetrics.density
-    }
-
-    private fun setupPreferences() {
-        sharedPreferences = getSharedPreferences(RX_PREFERENCE_NAME, Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putBoolean(FILTER_OPERATOR_SHOW, true)
-        editor.putBoolean(TRANSFORMING_OPERATOR_SHOW, false)
-        editor.apply()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

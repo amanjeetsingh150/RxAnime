@@ -6,19 +6,32 @@ import com.squareup.moshi.JsonClass
 
 enum class OperatorCategory {
     @Json(name = "Filtering")
-    FILTER{
+    FILTER {
         override fun getOperators(): Operator {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
     },
     @Json(name = "Transforming")
-    TRANSFORMING{
+    TRANSFORMING {
         override fun getOperators(): Operator {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
     };
 
     abstract fun getOperators(): Operator
+}
+
+
+enum class FilterOperator(name: String) {
+    TAKE(name = "Take(3)"),
+    FILTER(name = "Filter(even emissions)"),
+    SKIP(name = "Skip(3)"),
+    TAKE_LAST(name = "Take Last(2)")
+}
+
+enum class Transforming(name: String) {
+    MAP("Map(it->it*2)"),
+    BUFFER("Buffer(2)")
 }
 
 @JsonClass(generateAdapter = true)

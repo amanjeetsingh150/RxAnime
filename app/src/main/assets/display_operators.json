@@ -4,17 +4,17 @@
       "name": "Filtering",
       "operators": [
         {
-          "name": "Take Last(2)",
+          "name": "Take(3)",
           "description": "emits only the last n items emitted by an Observable.",
           "link": "http://reactivex.io/documentation/operators/takelast.html"
         },
         {
-          "name": "Take Last(2)",
+          "name": "Filter(even emissions)",
           "description": "emits only the last n items emitted by an Observable.",
           "link": "http://reactivex.io/documentation/operators/takelast.html"
         },
         {
-          "name": "Take Last(2)",
+          "name": "Skip(3)",
           "description": "emits only the last n items emitted by an Observable.",
           "link": "http://reactivex.io/documentation/operators/takelast.html"
         },
