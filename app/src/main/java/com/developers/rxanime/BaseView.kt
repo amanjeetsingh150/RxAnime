@@ -7,6 +7,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
 import android.view.animation.LinearInterpolator
@@ -24,7 +25,9 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
 
     private val linePaint = Paint()
     private val leftCirclePaint = Paint()
-
+    private val marblePaint = Paint()
+    private val textPaint = Paint()
+    private val bounds = Rect()
 
     init {
         linePaint.apply {
@@ -37,6 +40,18 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
             color = Color.BLACK
             style = Paint.Style.FILL_AND_STROKE
             strokeWidth = 30f
+        }
+        marblePaint.apply {
+            color = Color.RED
+            isAntiAlias = true
+            style = Paint.Style.STROKE
+        }
+        textPaint.apply {
+            color = Color.WHITE
+            textSize = 15.toPx().toFloat()
+            isAntiAlias = true
+            textAlign = Paint.Align.CENTER
+            getTextBounds("0", 0, 1, bounds)
         }
         circleY = 10.toPx().toFloat()
         circleRadius = 10.toPx().toFloat()
@@ -115,5 +130,12 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
         val animatorSet = AnimatorSet()
         animatorSet.playSequentially(circleYAnimator, scaleAnimation)
         animatorSet.start()
+    }
+
+    open fun drawNumericMarbles(cx: Float, cy: Float, number: Int, canvas: Canvas?) {
+        val text = number.toString()
+        canvas?.drawCircle(cx, cy, 15.toPx().toFloat(), marblePaint)
+        val yOffset = bounds.height() / 2
+        canvas?.drawText(text, cx, cy + yOffset, textPaint)
     }
 }
