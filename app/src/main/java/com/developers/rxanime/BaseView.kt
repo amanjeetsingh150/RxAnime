@@ -9,25 +9,45 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.view.animation.LinearInterpolator
+import com.developers.rxanime.model.CanvasState
+import com.developers.rxanime.model.RxAnimeState
+import com.developers.rxanime.util.SptoPx
+import com.developers.rxanime.util.awaitEnd
+import com.developers.rxanime.util.awaitViewDrawn
 import com.developers.rxanime.util.toPx
+import kotlinx.coroutines.*
 import kotlin.math.min
 
-abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(context, attributeSet) {
+class BaseView(context: Context, attributeSet: AttributeSet?) : View(context, attributeSet) {
 
-    private var circleY: Float = 0f
-    private var circleRadius = 0f
+    // Animate to move the marble
+    private var circleY: Float = 30.toPx().toFloat()
+    // Animate to scale the marble radius
+    private var circleRadius = 5.toPx().toFloat()
+
     private val lineStartY = 10.toPx()
     private val centreDistance = 100.toPx()
-    private val leftLineStart = width / 2.toFloat() - centreDistance
-    private val rightLineStart = width / 2.toFloat() + centreDistance
+    private var marbleStartY = 30.toPx().toFloat()
+
+    // To be assigned once view is drawn
+    private var leftLineStart = 0f
+    // To be assigned once view is drawn
+    private var rightLineStart = 0f
 
     private val linePaint = Paint()
     private val leftCirclePaint = Paint()
     private val marblePaint = Paint()
     private val textPaint = Paint()
+
     private val bounds = Rect()
+
+    private var rxAnimeState = RxAnimeState()
+
+    // TODO: change this by attaching lifecycle from activity/fragment
+    private var coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
     init {
         linePaint.apply {
@@ -37,6 +57,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
             strokeWidth = 5f
         }
         leftCirclePaint.apply {
+            isAntiAlias = true
             color = Color.BLACK
             style = Paint.Style.FILL_AND_STROKE
             strokeWidth = 30f
@@ -44,19 +65,22 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
         marblePaint.apply {
             color = Color.RED
             isAntiAlias = true
-            style = Paint.Style.STROKE
         }
         textPaint.apply {
             color = Color.WHITE
             textSize = 15.toPx().toFloat()
             isAntiAlias = true
             textAlign = Paint.Align.CENTER
+            textSize = 15.SptoPx().toFloat()
             getTextBounds("0", 0, 1, bounds)
         }
-        circleY = 10.toPx().toFloat()
-        circleRadius = 10.toPx().toFloat()
 
-        animateMarbles()
+        coroutineScope.launch {
+            awaitViewDrawn()
+            leftLineStart = width / 2.toFloat() - centreDistance
+            rightLineStart = width / 2.toFloat() + centreDistance
+            animateMarbles()
+        }
     }
 
 
@@ -94,21 +118,60 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
         // Lines
         canvas?.drawLine(leftLineStart, lineStartY.toFloat(), leftLineStart, height.toFloat(), linePaint)
         canvas?.drawLine(rightLineStart, lineStartY.toFloat(), rightLineStart, height.toFloat(), linePaint)
-
-        // Circle marble
+        // Draw Translating marble
         canvas?.drawCircle(leftLineStart, circleY, circleRadius, leftCirclePaint)
 
-        drawOperator(canvas)
+        Log.d(TAG, "Yes " + rxAnimeState.canvasState)
+
+        when (rxAnimeState.canvasState) {
+            CanvasState.DRAW_OPERATOR -> {
+                drawOperator(canvas)
+            }
+            CanvasState.DRAW_TEXT_MARBLE -> {
+                drawNumericMarbles(cx = leftLineStart, cy = marbleStartY, number = 1, canvas = canvas)
+            }
+            CanvasState.TRANSLATING_STATE -> {
+            }
+        }
+
     }
 
-    abstract fun drawOperator(canvas: Canvas?)
+    fun drawOperator(canvas: Canvas?) {
 
-    private fun animateMarbles() {
-        val propertyHolderY = PropertyValuesHolder.ofFloat(TRANSLATION_Y, 10.toPx().toFloat(), 60.toPx().toFloat())
-        val propertyValueScale = PropertyValuesHolder.ofFloat("CIRCLE_SCALE", circleRadius, 15.toPx().toFloat())
+    }
 
+    private suspend fun animateMarbles() {
+        withContext(Dispatchers.Main) {
+            // Initialize the animator Set
+            val (propertyHolderY, animatorSet) = initializeAnimator()
+            // Repeat the animation 4 times
+            repeat(4) {
+                animatorSet.start()
+                // Wait for end
+                animatorSet.awaitEnd()
+                marbleStartY += Y_OFFSET
+                rxAnimeState = rxAnimeState.copy(canvasState = CanvasState.DRAW_TEXT_MARBLE)
+                propertyHolderY.setFloatValues(marbleStartY, marbleStartY + Y_OFFSET)
+                // Change state to draw numerical marble
+            }
+        }
+    }
+
+    private fun drawNumericMarbles(cx: Float, cy: Float, number: Int, canvas: Canvas?) {
+        val text = number.toString()
+        canvas?.drawCircle(cx, cy, 15.toPx().toFloat(), marblePaint)
+        val yOffset = bounds.height() / 2
+        canvas?.drawText(text, cx, cy + yOffset, textPaint)
+        invalidate()
+    }
+
+    private fun initializeAnimator(): Pair<PropertyValuesHolder, AnimatorSet> {
+        val propertyHolderY = PropertyValuesHolder.ofFloat(MARBLE_TRANSLATION_Y, marbleStartY, marbleStartY + Y_OFFSET)
+        val propertyValueScale = PropertyValuesHolder.ofFloat(MARBLE_SCALE_PROPERTY, circleRadius, 10.toPx().toFloat())
+
+        // Animator for Y coordinate of marble
         val circleYAnimator = ValueAnimator().apply {
-            duration = 600
+            duration = 900
             setValues(propertyHolderY)
             interpolator = LinearInterpolator()
             addUpdateListener {
@@ -117,6 +180,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
             }
         }
 
+        // Animator for scaling marble
         val scaleAnimation = ValueAnimator().apply {
             duration = 300
             setValues(propertyValueScale)
@@ -127,15 +191,21 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
             }
         }
 
-        val animatorSet = AnimatorSet()
-        animatorSet.playSequentially(circleYAnimator, scaleAnimation)
-        animatorSet.start()
+        val animatorSet = AnimatorSet().apply {
+            playSequentially(circleYAnimator, scaleAnimation)
+            interpolator = LinearInterpolator()
+        }
+        return Pair(propertyHolderY, animatorSet)
     }
 
-    open fun drawNumericMarbles(cx: Float, cy: Float, number: Int, canvas: Canvas?) {
-        val text = number.toString()
-        canvas?.drawCircle(cx, cy, 15.toPx().toFloat(), marblePaint)
-        val yOffset = bounds.height() / 2
-        canvas?.drawText(text, cx, cy + yOffset, textPaint)
+    fun attachScope(coroutineScope: CoroutineScope) {
+        this.coroutineScope = coroutineScope
+    }
+
+    companion object {
+        private const val MARBLE_SCALE_PROPERTY = "MARBLE_SCALE"
+        private const val MARBLE_TRANSLATION_Y = "MARBLE_TRANSLATION"
+        private const val Y_OFFSET = 200.toFloat()
+        private const val TAG = "BaseView"
     }
 }

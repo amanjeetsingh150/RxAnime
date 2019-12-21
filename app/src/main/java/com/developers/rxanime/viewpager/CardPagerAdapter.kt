@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import com.developers.rxanime.BaseView
 import com.developers.rxanime.R
 import com.developers.rxanime.StreamView
 import com.developers.rxanime.model.CardItem
@@ -46,12 +47,12 @@ class CardPagerAdapter : androidx.viewpager.widget.PagerAdapter() {
         operatorTitleTextView = view.findViewById(R.id.operatorName)
         operatorHtmlLinkTextView = view.findViewById(R.id.operatorHtmlLink)
         operatorDescriptionTextView = view.findViewById(R.id.operatorDescription)
-        if (position > 0) {
-            view.findViewById<StreamView>(R.id.streamView).setShouldReset(true)
-        }
-        if (position == 0) {
-            view.findViewById<StreamView>(R.id.streamView).init()
-        }
+//        if (position > 0) {
+//            view.findViewById<BaseView>(R.id.streamView).setShouldReset(true)
+//        }
+//        if (position == 0) {
+//            view.findViewById<BaseView>(R.id.streamView).
+//        }
         cardView.maxCardElevation = baseElevation * MAX_ELEVATION_FACTOR
         operatorTitleTextView.text = dataList[position].operatorName
         operatorHtmlLinkTextView.text = dataList[position].operatorHtmlLink

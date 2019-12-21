@@ -181,21 +181,21 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when (item?.itemId) {
             R.id.transforming_operators -> {
-                val editor = sharedPreferences.edit()
-                editor.putString(CURRENT_SELECTION, OperatorCategory.TRANSFORMING.toString())
-                changePreferences(false, true)
-                cardPagerAdapter.cleatItems()
-                toggleOperatorsOnView(streamView, false, false, false,
-                        false, true, false)
-                addTransFormingOperatorsToModel()
+//                val editor = sharedPreferences.edit()
+//                editor.putString(CURRENT_SELECTION, OperatorCategory.TRANSFORMING.toString())
+//                changePreferences(false, true)
+//                cardPagerAdapter.cleatItems()
+//                toggleOperatorsOnView(streamView, false, false, false,
+//                        false, true, false)
+//                addTransFormingOperatorsToModel()
                 true
             }
             R.id.filtering_operators -> {
-                changePreferences(true, false)
-                cardPagerAdapter.cleatItems()
-                toggleOperatorsOnView(streamView, false, true, false,
-                        false, false, false)
-                addFilteringOperatorsToModel()
+//                changePreferences(true, false)
+//                cardPagerAdapter.cleatItems()
+//                toggleOperatorsOnView(streamView, false, true, false,
+//                        false, false, false)
+//                addFilteringOperatorsToModel()
                 true
             }
             else -> super.onOptionsItemSelected(item)
