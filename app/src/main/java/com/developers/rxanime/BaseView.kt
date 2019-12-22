@@ -13,15 +13,19 @@ import android.util.Log
 import android.view.View
 import android.view.animation.LinearInterpolator
 import com.developers.rxanime.model.CanvasState
+import com.developers.rxanime.model.MarbleData
 import com.developers.rxanime.model.RxAnimeState
-import com.developers.rxanime.util.SptoPx
+import com.developers.rxanime.util.spToPx
 import com.developers.rxanime.util.awaitEnd
 import com.developers.rxanime.util.awaitViewDrawn
 import com.developers.rxanime.util.toPx
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.min
 
-class BaseView(context: Context, attributeSet: AttributeSet?) : View(context, attributeSet) {
+abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(context, attributeSet) {
 
     // Animate to move the marble
     private var circleY: Float = 30.toPx().toFloat()
@@ -33,7 +37,7 @@ class BaseView(context: Context, attributeSet: AttributeSet?) : View(context, at
     private var marbleStartY = 30.toPx().toFloat()
 
     // To be assigned once view is drawn
-    private var leftLineStart = 0f
+    var leftLineStart = 0f
     // To be assigned once view is drawn
     private var rightLineStart = 0f
 
@@ -45,6 +49,7 @@ class BaseView(context: Context, attributeSet: AttributeSet?) : View(context, at
     private val bounds = Rect()
 
     private var rxAnimeState = RxAnimeState()
+    private val marbleList = mutableListOf<MarbleData>()
 
     // TODO: change this by attaching lifecycle from activity/fragment
     private var coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
@@ -71,7 +76,7 @@ class BaseView(context: Context, attributeSet: AttributeSet?) : View(context, at
             textSize = 15.toPx().toFloat()
             isAntiAlias = true
             textAlign = Paint.Align.CENTER
-            textSize = 15.SptoPx().toFloat()
+            textSize = 16.spToPx().toFloat()
             getTextBounds("0", 0, 1, bounds)
         }
 
@@ -121,24 +126,34 @@ class BaseView(context: Context, attributeSet: AttributeSet?) : View(context, at
         // Draw Translating marble
         canvas?.drawCircle(leftLineStart, circleY, circleRadius, leftCirclePaint)
 
-        Log.d(TAG, "Yes " + rxAnimeState.canvasState)
+        Log.d(TAG, "State: " + rxAnimeState.canvasState)
 
         when (rxAnimeState.canvasState) {
             CanvasState.DRAW_OPERATOR -> {
                 drawOperator(canvas)
             }
             CanvasState.DRAW_TEXT_MARBLE -> {
-                drawNumericMarbles(cx = leftLineStart, cy = marbleStartY, number = 1, canvas = canvas)
+                drawMovingNumericalMarbles(canvas)
             }
             CanvasState.TRANSLATING_STATE -> {
+
             }
         }
 
     }
 
-    fun drawOperator(canvas: Canvas?) {
-
+    /**
+     * Draws moving textual marbles on canvas.
+     *
+     * @canvas Canvas for the custom view
+     */
+    private fun drawMovingNumericalMarbles(canvas: Canvas?) {
+        for (marbles in marbleList) {
+            drawNumericMarbles(cx = marbles.cx, cy = marbles.cy, number = marbles.data, canvas = canvas)
+        }
     }
+
+    abstract fun drawOperator(canvas: Canvas?)
 
     private suspend fun animateMarbles() {
         withContext(Dispatchers.Main) {
@@ -150,9 +165,11 @@ class BaseView(context: Context, attributeSet: AttributeSet?) : View(context, at
                 // Wait for end
                 animatorSet.awaitEnd()
                 marbleStartY += Y_OFFSET
-                rxAnimeState = rxAnimeState.copy(canvasState = CanvasState.DRAW_TEXT_MARBLE)
-                propertyHolderY.setFloatValues(marbleStartY, marbleStartY + Y_OFFSET)
                 // Change state to draw numerical marble
+                rxAnimeState = rxAnimeState.copy(canvasState = CanvasState.DRAW_TEXT_MARBLE)
+                marbleList.add(MarbleData(leftLineStart, marbleStartY, it))
+
+                propertyHolderY.setFloatValues(marbleStartY, marbleStartY + Y_OFFSET)
             }
         }
     }

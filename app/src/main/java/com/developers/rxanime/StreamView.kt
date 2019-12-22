@@ -12,8 +12,7 @@ import android.view.animation.LinearInterpolator
 import android.util.TypedValue
 import android.util.DisplayMetrics
 import android.graphics.*
-import android.util.Log
-import com.developers.rxanime.model.EmissionCircleData
+import com.developers.rxanime.model.MarbleData
 
 
 class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, attributeSet), Animator.AnimatorListener {
@@ -21,13 +20,13 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
     private var initialCircleY = 0f
     private var endVal = 0f
     private var circleRadius = 0
-    private var emissionCircleList = mutableListOf<EmissionCircleData?>()
-    private var takeOperatorEmissionList = mutableListOf<EmissionCircleData>()
-    private var takeLastOperatorEmissionList = mutableListOf<EmissionCircleData>()
-    private var filterOperatorEmissionList = mutableListOf<EmissionCircleData>()
-    private var skipOperatorEmissionList = mutableListOf<EmissionCircleData>()
-    private var mapOperatorEmissionList = mutableListOf<EmissionCircleData>()
-    private var bufferOperatorEmissionList = mutableListOf<EmissionCircleData>()
+    private var emissionCircleList = mutableListOf<MarbleData?>()
+    private var takeOperatorEmissionList = mutableListOf<MarbleData>()
+    private var takeLastOperatorEmissionList = mutableListOf<MarbleData>()
+    private var filterOperatorEmissionList = mutableListOf<MarbleData>()
+    private var skipOperatorEmissionList = mutableListOf<MarbleData>()
+    private var mapOperatorEmissionList = mutableListOf<MarbleData>()
+    private var bufferOperatorEmissionList = mutableListOf<MarbleData>()
     private var startPoint = 0f
     private var count = 0
     private var bufferCount = 0
@@ -77,9 +76,9 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
         textPaint.textAlign = Paint.Align.CENTER
 
         textPaint.getTextBounds("0", 0, 1, bounds)
-        sharedPreferences = context.getSharedPreferences(MainActivity.RX_PREFERENCE_NAME, Context.MODE_PRIVATE)
-        shouldShowFilteringOperators = sharedPreferences.getBoolean(MainActivity.FILTER_OPERATOR_SHOW, false)
-        shouldShowTransformingOperators = sharedPreferences.getBoolean(MainActivity.TRANSFORMING_OPERATOR_SHOW, false)
+        sharedPreferences = context.getSharedPreferences(RxAnimeActivity.RX_PREFERENCE_NAME, Context.MODE_PRIVATE)
+        shouldShowFilteringOperators = sharedPreferences.getBoolean(RxAnimeActivity.FILTER_OPERATOR_SHOW, false)
+        shouldShowTransformingOperators = sharedPreferences.getBoolean(RxAnimeActivity.TRANSFORMING_OPERATOR_SHOW, false)
         when {
             shouldShowTransformingOperators -> {
                 canShowMapOperator = true
@@ -290,7 +289,7 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
                     shouldDrawMarbleEmission = true
                     startPoint += getDimensionInPixel(50)
                     endVal = startPoint + getDimensionInPixel(50)
-                    emissionCircleList.add(EmissionCircleData(width.div(2).toFloat() - differenceOfFirstLineFromCenter, startPoint, count))
+                    emissionCircleList.add(MarbleData(width.div(2).toFloat() - differenceOfFirstLineFromCenter, startPoint, count))
                     propertyValueHolderYAnimation.setFloatValues(startPoint, endVal)
                     if (count < 3 && canShowTakeOperator) {
                         takeOperatorEmissionList.add(emissionCircleList[count]!!)
@@ -302,7 +301,7 @@ class StreamView(context: Context, attributeSet: AttributeSet?) : View(context, 
                         skipOperatorEmissionList.add(emissionCircleList[count]!!)
                     } else if (canShowMapOperator) {
                         val mappedEmissionData = emissionCircleList[count]!!.data * 2
-                        val mappedEmission = EmissionCircleData(width.div(2).toFloat() - differenceOfFirstLineFromCenter, startPoint, mappedEmissionData)
+                        val mappedEmission = MarbleData(width.div(2).toFloat() - differenceOfFirstLineFromCenter, startPoint, mappedEmissionData)
                         mapOperatorEmissionList.add(mappedEmission)
                     } else if (canShowBufferOperator) {
                         //Current and next

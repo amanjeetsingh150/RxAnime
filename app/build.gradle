@@ -33,6 +33,7 @@ dependencies {
     implementation "com.jakewharton.rxbinding2:rxbinding-kotlin:2.1.1"
     implementation "com.jakewharton.rxbinding2:rxbinding-support-v4-kotlin:2.1.1"
     implementation "io.reactivex.rxjava2:rxkotlin:2.4.0"
+    implementation "com.f2prateek.rx.preferences2:rx-preferences:2.0.0"
     implementation "android.arch.lifecycle:extensions:1.1.1"
     implementation "android.arch.lifecycle:viewmodel:1.1.1"
     testImplementation 'junit:junit:4.12'

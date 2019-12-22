@@ -8,6 +8,7 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
+import com.developers.rxanime.model.Category
 
 class AdjustableViewPager(context: Context, attributeSet: AttributeSet?) : androidx.viewpager.widget.ViewPager(context, attributeSet) {
 

@@ -6,4 +6,5 @@ enum class CanvasState {
     TRANSLATING_STATE
 }
 
-data class RxAnimeState(val canvasState: CanvasState = CanvasState.TRANSLATING_STATE)
+data class RxAnimeState(val canvasState: CanvasState = CanvasState.TRANSLATING_STATE,
+                        val operator: Operator? = null)

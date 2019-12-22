@@ -11,10 +11,11 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <com.developers.rxanime.BaseView
-            android:id="@+id/streamView"
+        <LinearLayout
+            android:id="@+id/streamViewContainer"
             android:layout_width="match_parent"
-            android:layout_height="400dp" />
+            android:layout_height="400dp"
+            android:orientation="vertical"/>
 
         <TextView
             android:id="@+id/operatorName"

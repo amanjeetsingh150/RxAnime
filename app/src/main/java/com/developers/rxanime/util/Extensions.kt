@@ -11,7 +11,7 @@ import kotlin.coroutines.resume
 
 fun Int.toPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
 
-fun Int.SptoPx(): Int = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, this.toFloat(),
+fun Int.spToPx(): Int = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, this.toFloat(),
         Resources.getSystem().displayMetrics).toInt()
 
 
