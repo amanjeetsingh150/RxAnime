@@ -2,12 +2,12 @@ package com.developers.rxanime.util
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.animation.AnimatorSet
 import android.content.res.Resources
 import android.util.TypedValue
 import android.view.View
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+import com.developers.rxanime.model.BaseOperator as Base
 
 fun Int.toPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
 
@@ -15,11 +15,11 @@ fun Int.spToPx(): Int = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, th
         Resources.getSystem().displayMetrics).toInt()
 
 
-inline fun <reified T : Enum<T>> String.getOperator(): T? {
-    return enumValues<T>().firstOrNull { it.name == this }
+inline fun <reified BaseOperator : Enum<BaseOperator>> String.getOperator(): BaseOperator? {
+    return enumValues<BaseOperator>().firstOrNull { (it as Base).getOperatorName() == this }
 }
 
-suspend fun AnimatorSet.awaitEnd() = suspendCancellableCoroutine<Unit> { cont ->
+suspend fun Animator.awaitEnd() = suspendCancellableCoroutine<Unit> { cont ->
 
     // Invoke cancel on cancellation
     cont.invokeOnCancellation { cancel() }

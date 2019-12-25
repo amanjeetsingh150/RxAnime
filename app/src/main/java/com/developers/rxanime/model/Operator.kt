@@ -21,23 +21,39 @@ enum class OperatorCategory {
     abstract fun getOperators(): Operator
 }
 
-
-enum class FilterOperator(name: String) {
-    TAKE(name = "Take(3)"),
-    FILTER(name = "Filter(even emissions)"),
-    SKIP(name = "Skip(3)"),
-    TAKE_LAST(name = "Take Last(2)")
+interface BaseOperator {
+    fun getOperatorName(): String
 }
 
-enum class Transforming(name: String) {
-    MAP("Map(it->it*2)"),
-    BUFFER("Buffer(2)")
+enum class FilterOperator : BaseOperator {
+    TAKE {
+        override fun getOperatorName() = "Take(3)"
+    },
+    FILTER {
+        override fun getOperatorName() = "Filter(even emissions)"
+    },
+    SKIP {
+        override fun getOperatorName() = "Skip(3)"
+    },
+    TAKE_LAST {
+        override fun getOperatorName() = "Take Last(2)"
+    }
+}
+
+enum class Transforming : BaseOperator {
+    MAP {
+        override fun getOperatorName() = "Map(it->it*2)"
+    },
+    BUFFER {
+        override fun getOperatorName() = "Buffer(2)"
+    };
 }
 
 @JsonClass(generateAdapter = true)
 data class Operator(@Json(name = "name") val name: String,
                     @Json(name = "description") val description: String = "",
-                    @Json(name = "link") val operatorLink: String = "")
+                    @Json(name = "link") val operatorLink: String = "",
+                    @Json(name = "view") val view: String = "")
 
 @JsonClass(generateAdapter = true)
 data class Category(@Json(name = "name") val name: OperatorCategory,

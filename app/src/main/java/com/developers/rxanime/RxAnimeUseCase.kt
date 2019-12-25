@@ -1,23 +1,25 @@
 package com.developers.rxanime
 
 import com.developers.rxanime.model.CardItem
+import com.developers.rxanime.model.Category
 
 interface RxAnimeUseCase {
 
-    fun fetchFilterOperators(): List<CardItem>
-
-    fun fetchTransformingOperators(): List<CardItem>
+    fun fetchFilterOperators(categoryList: List<Category>): List<CardItem>
 
 }
 
 class RxAnimeUseCaseImpl : RxAnimeUseCase {
 
-    override fun fetchFilterOperators(): List<CardItem> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    private val cardItemList = mutableListOf<CardItem>()
 
-    override fun fetchTransformingOperators(): List<CardItem> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun fetchFilterOperators(categoryList: List<Category>): List<CardItem> {
+        categoryList.forEach {
+            it.operators.forEach { operator ->
+                cardItemList.add(CardItem(name = operator.name, description = operator.description,
+                        htmlLink = operator.operatorLink, operatorCategory = it.name))
+            }
+        }
+        return cardItemList
     }
-
 }

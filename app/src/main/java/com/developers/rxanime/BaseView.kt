@@ -12,12 +12,13 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import android.view.animation.LinearInterpolator
-import com.developers.rxanime.model.CanvasState
+import com.developers.rxanime.model.CanvasAction
+import com.developers.rxanime.model.FilterOperator
 import com.developers.rxanime.model.MarbleData
 import com.developers.rxanime.model.RxAnimeState
-import com.developers.rxanime.util.spToPx
 import com.developers.rxanime.util.awaitEnd
 import com.developers.rxanime.util.awaitViewDrawn
+import com.developers.rxanime.util.spToPx
 import com.developers.rxanime.util.toPx
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,13 +28,14 @@ import kotlin.math.min
 
 abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(context, attributeSet) {
 
+    private lateinit var canvasAction: CanvasAction
     // Animate to move the marble
     private var circleY: Float = 30.toPx().toFloat()
     // Animate to scale the marble radius
     private var circleRadius = 5.toPx().toFloat()
 
     private val lineStartY = 10.toPx()
-    private val centreDistance = 100.toPx()
+    val centreDistance = 100.toPx()
     private var marbleStartY = 30.toPx().toFloat()
 
     // To be assigned once view is drawn
@@ -41,7 +43,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
     // To be assigned once view is drawn
     private var rightLineStart = 0f
 
-    private val linePaint = Paint()
+    val linePaint = Paint()
     private val leftCirclePaint = Paint()
     private val marblePaint = Paint()
     private val textPaint = Paint()
@@ -52,7 +54,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
     private val marbleList = mutableListOf<MarbleData>()
 
     // TODO: change this by attaching lifecycle from activity/fragment
-    private var coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
+    var coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
     init {
         linePaint.apply {
@@ -126,16 +128,14 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
         // Draw Translating marble
         canvas?.drawCircle(leftLineStart, circleY, circleRadius, leftCirclePaint)
 
-        Log.d(TAG, "State: " + rxAnimeState.canvasState)
+        Log.d(TAG, "State: " + rxAnimeState.canvasAction)
 
-        when (rxAnimeState.canvasState) {
-            CanvasState.DRAW_OPERATOR -> {
-                drawOperator(canvas)
-            }
-            CanvasState.DRAW_TEXT_MARBLE -> {
+        when (rxAnimeState.canvasAction) {
+            CanvasAction.DRAW_OPERATOR -> {
                 drawMovingNumericalMarbles(canvas)
+                drawOperator(canvas, rxAnimeState.currentData)
             }
-            CanvasState.TRANSLATING_STATE -> {
+            CanvasAction.INITIAL_STATE -> {
 
             }
         }
@@ -153,21 +153,23 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
         }
     }
 
-    abstract fun drawOperator(canvas: Canvas?)
+    abstract fun drawOperator(canvas: Canvas?, currentData: MarbleData)
 
     private suspend fun animateMarbles() {
         withContext(Dispatchers.Main) {
             // Initialize the animator Set
             val (propertyHolderY, animatorSet) = initializeAnimator()
             // Repeat the animation 4 times
-            repeat(4) {
+            repeat(4) { currentMarbleData ->
                 animatorSet.start()
                 // Wait for end
                 animatorSet.awaitEnd()
                 marbleStartY += Y_OFFSET
-                // Change state to draw numerical marble
-                rxAnimeState = rxAnimeState.copy(canvasState = CanvasState.DRAW_TEXT_MARBLE)
-                marbleList.add(MarbleData(leftLineStart, marbleStartY, it))
+                val currentMarble = MarbleData(leftLineStart, marbleStartY, currentMarbleData)
+                // Dispatch Action and data
+                rxAnimeState = rxAnimeState.copy(canvasAction = CanvasAction.DRAW_OPERATOR,
+                        currentData = currentMarble)
+                marbleList.add(currentMarble)
 
                 propertyHolderY.setFloatValues(marbleStartY, marbleStartY + Y_OFFSET)
             }

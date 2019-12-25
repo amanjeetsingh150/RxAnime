@@ -1,7 +1,8 @@
 package com.developers.rxanime
 
-import android.content.SharedPreferences
 import android.os.Bundle
+import android.preference.PreferenceManager
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -11,11 +12,11 @@ import com.developers.rxanime.model.CardItem
 import com.developers.rxanime.model.FilterOperator
 import com.developers.rxanime.model.OperatorCategory
 import com.developers.rxanime.model.Transforming
-import com.developers.rxanime.operators.TakeOperatorView
 import com.developers.rxanime.util.getOperator
 import com.developers.rxanime.util.toPx
 import com.developers.rxanime.viewpager.CardPagerAdapter
-import com.developers.rxanime.viewpager.CardsPagerTransformerBasic
+import com.developers.rxanime.viewpager.CardsPagerTransformer
+import com.f2prateek.rx.preferences2.RxSharedPreferences
 import com.jakewharton.rxbinding2.support.v4.view.RxViewPager
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
@@ -27,7 +28,15 @@ import java.nio.charset.Charset
 class RxAnimeActivity : AppCompatActivity() {
 
     private lateinit var cardPagerAdapter: CardPagerAdapter
-    private lateinit var sharedPreferences: SharedPreferences
+
+    private val sharedPreferences by lazy {
+        PreferenceManager.getDefaultSharedPreferences(this)
+    }
+    private val rxSharedPreference by lazy { RxSharedPreferences.create(sharedPreferences) }
+    private val selectedCategory by lazy {
+        rxSharedPreference.getString(RX_ANIME_PREFERENCES, OperatorCategory.FILTER.toString())
+    }
+    private lateinit var operatorViewInitializer: OperatorViewInitializer
     private lateinit var mainViewModel: RxAnimeViewModel
 
     private val disposable = CompositeDisposable()
@@ -37,14 +46,58 @@ class RxAnimeActivity : AppCompatActivity() {
         const val FILTER_OPERATOR_SHOW = "FILTER_OPERATORS"
         const val TRANSFORMING_OPERATOR_SHOW = "TRANSFORM_OPERATORS"
         private const val CURRENT_SELECTION = "CURRENT_OPERATOR_CATEGORY"
+        private const val RX_ANIME_PREFERENCES = "RX_ANIME_PREFS"
     }
+
+    private val cardsPagerTransformer = CardsPagerTransformer(5, 10, 0.6f)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         mainViewModel = ViewModelProviders.of(this).get(RxAnimeViewModel::class.java)
         val displayData = mainViewModel.fetchCategories(loadJSONFromAsset())
-        val categoryList = displayData?.displayData
+        val categoryList = displayData?.displayData?.apply {
+            operatorViewInitializer = OperatorViewInitializer(this, this@RxAnimeActivity)
+        }
+        disposable += selectedCategory.asObservable()
+                .map {
+                    val initialCardItems = mainViewModel.fetchCurrentOperators(categoryList = categoryList)
+                    when (OperatorCategory.valueOf(it)) {
+                        OperatorCategory.FILTER -> {
+                            val filterViews = operatorViewInitializer.fetchFilterViews()
+                            return@map initialCardItems.asSequence()
+                                    .filter { operator -> operator.operatorCategory == OperatorCategory.FILTER }
+                                    .mapIndexed { position, operator ->
+                                        CardItem(name = operator.name,
+                                                description = operator.description,
+                                                htmlLink = operator.htmlLink,
+                                                operatorVisualizer = filterViews[position],
+                                                operatorCategory = OperatorCategory.FILTER)
+                                    }.toList()
+                        }
+                        OperatorCategory.TRANSFORMING -> {
+                            val transformingViews = operatorViewInitializer.fetchTransformingViews()
+                            return@map initialCardItems.asSequence()
+                                    .filter { operator -> operator.operatorCategory == OperatorCategory.FILTER }
+                                    .mapIndexed { position, operator ->
+                                        CardItem(name = operator.name,
+                                                description = operator.description,
+                                                htmlLink = operator.htmlLink,
+                                                operatorVisualizer = transformingViews[position],
+                                                operatorCategory = OperatorCategory.TRANSFORMING)
+                                    }.toList()
+                        }
+                    }
+                }
+                .subscribe({ operators ->
+                    Log.d("RxAnime", "onSuccess ")
+                    cardPagerAdapter = CardPagerAdapter()
+                    cardPagerAdapter.addOperators(operators)
+                    viewPager.adapter = cardPagerAdapter
+                }, {
+                    Log.d("RxAnime", "onError ${it.printStackTrace()}")
+                    showError(it)
+                })
 
         disposable += RxViewPager.pageSelections(viewPager)
                 .subscribe({ position ->
@@ -59,42 +112,33 @@ class RxAnimeActivity : AppCompatActivity() {
                     when (OperatorCategory.valueOf(currentSelection)) {
 
                         OperatorCategory.FILTER -> {
-                            val selectedOperatorList = operators?.let {
+                            operators?.let {
                                 val currentOperatorName = it[position].name.getOperator<FilterOperator>()
-
                             }
 
                         }
                         OperatorCategory.TRANSFORMING -> {
-                            val selectedOperatorList = operators?.let {
+                            operators?.let {
                                 val currentOperatorName = it[position].name.getOperator<Transforming>()
                             }
                         }
                     }
-                }, {
-                    // Some error occurred
-                    Toast.makeText(this, it.message, Toast.LENGTH_SHORT).show()
-                })
+                }, { showError(it) })
 
-        cardPagerAdapter = CardPagerAdapter()
-        setupInitialOperators(cardPagerAdapter)
         with(viewPager) {
             pageMargin = 5.toPx()
-            setPageTransformer(false, CardsPagerTransformerBasic(5, 10, 0.6f))
-            adapter = cardPagerAdapter
+            setPageTransformer(false, cardsPagerTransformer)
             offscreenPageLimit = 1
         }
     }
 
-    private fun setupInitialOperators(cardPagerAdapter: CardPagerAdapter) {
-        cardPagerAdapter.addItem(CardItem(getString(R.string.take_operator), getString(R.string.take_operator_desc),
-                getString(R.string.take_operator_link), TakeOperatorView(this, null)))
-        cardPagerAdapter.addItem(CardItem(getString(R.string.take_last_operator), getString(R.string.take_last_operator_desc),
-                getString(R.string.take_last_operator_link), TakeOperatorView(this, null)))
-        cardPagerAdapter.addItem(CardItem(getString(R.string.filter_operator), getString(R.string.filter_operator_desc),
-                getString(R.string.filter_operator_link), TakeOperatorView(this, null)))
-        cardPagerAdapter.addItem(CardItem(getString(R.string.skip_operator), getString(R.string.skip_operator_desc),
-                getString(R.string.skip_operator_link), TakeOperatorView(this, null)))
+    /**
+     * Shows error in form of a toast.
+     *
+     * @param it Throwable to get the error message.
+     */
+    private fun showError(it: Throwable) {
+        Toast.makeText(this, it.message, Toast.LENGTH_SHORT).show()
     }
 
     private fun loadJSONFromAsset(): String {
@@ -119,6 +163,11 @@ class RxAnimeActivity : AppCompatActivity() {
         return true
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        disposable.dispose()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when (item?.itemId) {
             R.id.transforming_operators -> {
@@ -126,7 +175,6 @@ class RxAnimeActivity : AppCompatActivity() {
                     putString(CURRENT_SELECTION, OperatorCategory.TRANSFORMING.toString())
                     apply()
                 }
-                cardPagerAdapter.cleatItems()
                 true
             }
             R.id.filtering_operators -> {
@@ -138,16 +186,5 @@ class RxAnimeActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    private fun addFilteringOperatorsToModel() {
-        cardPagerAdapter.addItem(CardItem(getString(R.string.take_operator), getString(R.string.take_operator_desc),
-                getString(R.string.take_operator_link), StreamView(this)))
-        cardPagerAdapter.addItem(CardItem(getString(R.string.filter_operator), getString(R.string.filter_operator_desc),
-                getString(R.string.filter_operator_link), StreamView(this)))
-        cardPagerAdapter.addItem(CardItem(getString(R.string.skip_operator), getString(R.string.skip_operator_desc),
-                getString(R.string.skip_operator_link), StreamView(this)))
-        cardPagerAdapter.notifyDataSetChanged()
-        viewPager.currentItem = 0
     }
 }

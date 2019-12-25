@@ -9,25 +9,10 @@ import androidx.cardview.widget.CardView
 import androidx.viewpager.widget.PagerAdapter
 import com.developers.rxanime.R
 import com.developers.rxanime.model.CardItem
-import com.developers.rxanime.model.FilterOperator
-import com.developers.rxanime.operators.TakeOperatorView
 
 class CardPagerAdapter : PagerAdapter() {
 
-
-    private lateinit var filterOperatorList: List<FilterOperator>
-
-    private var baseElevation = 4f
-    private var dataList = mutableListOf<CardItem>()
-
-
-    fun addItem(cardItem: CardItem) {
-        dataList.add(cardItem)
-    }
-
-    fun cleatItems() {
-        this.dataList.clear()
-    }
+    private lateinit var dataList: List<CardItem>
 
     override fun isViewFromObject(view: View, anyObject: Any): Boolean {
         return view == anyObject
@@ -48,10 +33,10 @@ class CardPagerAdapter : PagerAdapter() {
         val streamContainerView = view.findViewById<LinearLayout>(R.id.streamViewContainer)
 
         streamContainerView.addView(dataList[position].operatorVisualizer)
-        cardView.maxCardElevation = baseElevation * MAX_ELEVATION
-        operatorTitleTextView.text = dataList[position].operatorName
-        operatorHtmlLinkTextView.text = dataList[position].operatorHtmlLink
-        operatorDescriptionTextView.text = dataList[position].operatorDescription
+        cardView.maxCardElevation = MAX_ELEVATION
+        operatorTitleTextView.text = dataList[position].name
+        operatorHtmlLinkTextView.text = dataList[position].htmlLink
+        operatorDescriptionTextView.text = dataList[position].description
         return view
     }
 
@@ -63,8 +48,14 @@ class CardPagerAdapter : PagerAdapter() {
         container.removeView(`object` as View)
     }
 
+    fun addOperators(operators: List<CardItem>) {
+        this.dataList = operators
+    }
+
     companion object {
-        private const val MAX_ELEVATION = 8
+        private const val MAX_ELEVATION_CONST = 8
+        private const val BASE_ELEVATION = 4f
+        private const val MAX_ELEVATION = BASE_ELEVATION * MAX_ELEVATION_CONST
     }
 
 }

@@ -6,7 +6,7 @@ import androidx.viewpager.widget.ViewPager
 import android.view.View
 
 
-class CardsPagerTransformerBasic(private val baseElevation: Int, private val raisingElevation: Int, private val smallerScale: Float) : androidx.viewpager.widget.ViewPager.PageTransformer {
+class CardsPagerTransformer(private val baseElevation: Int, private val raisingElevation: Int, private val smallerScale: Float) : androidx.viewpager.widget.ViewPager.PageTransformer {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun transformPage(page: View, position: Float) {
