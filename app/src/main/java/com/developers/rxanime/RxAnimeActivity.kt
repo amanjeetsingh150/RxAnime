@@ -30,7 +30,7 @@ class RxAnimeActivity : AppCompatActivity() {
     private lateinit var cardPagerAdapter: CardPagerAdapter
 
     private val sharedPreferences by lazy {
-        PreferenceManager.getDefaultSharedPreferences(this)
+         PreferenceManager.getDefaultSharedPreferences(this)
     }
     private val rxSharedPreference by lazy { RxSharedPreferences.create(sharedPreferences) }
     private val selectedCategory by lazy {

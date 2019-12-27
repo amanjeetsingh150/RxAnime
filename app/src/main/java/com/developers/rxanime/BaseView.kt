@@ -13,7 +13,6 @@ import android.util.Log
 import android.view.View
 import android.view.animation.LinearInterpolator
 import com.developers.rxanime.model.CanvasAction
-import com.developers.rxanime.model.FilterOperator
 import com.developers.rxanime.model.MarbleData
 import com.developers.rxanime.model.RxAnimeState
 import com.developers.rxanime.util.awaitEnd
@@ -28,7 +27,6 @@ import kotlin.math.min
 
 abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(context, attributeSet) {
 
-    private lateinit var canvasAction: CanvasAction
     // Animate to move the marble
     private var circleY: Float = 30.toPx().toFloat()
     // Animate to scale the marble radius
@@ -36,12 +34,13 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
 
     private val lineStartY = 10.toPx()
     val centreDistance = 100.toPx()
+    var offset = 0f
     private var marbleStartY = 30.toPx().toFloat()
 
     // To be assigned once view is drawn
     var leftLineStart = 0f
     // To be assigned once view is drawn
-    private var rightLineStart = 0f
+    var rightLineStart = 0f
 
     val linePaint = Paint()
     private val leftCirclePaint = Paint()
@@ -164,6 +163,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
                 animatorSet.start()
                 // Wait for end
                 animatorSet.awaitEnd()
+                offset = 0f
                 marbleStartY += Y_OFFSET
                 val currentMarble = MarbleData(leftLineStart, marbleStartY, currentMarbleData)
                 // Dispatch Action and data
@@ -187,6 +187,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
     private fun initializeAnimator(): Pair<PropertyValuesHolder, AnimatorSet> {
         val propertyHolderY = PropertyValuesHolder.ofFloat(MARBLE_TRANSLATION_Y, marbleStartY, marbleStartY + Y_OFFSET)
         val propertyValueScale = PropertyValuesHolder.ofFloat(MARBLE_SCALE_PROPERTY, circleRadius, 10.toPx().toFloat())
+        val propertyValueTranslateX = PropertyValuesHolder.ofFloat("X", leftLineStart, centreDistance * 2f)
 
         // Animator for Y coordinate of marble
         val circleYAnimator = ValueAnimator().apply {
@@ -210,10 +211,23 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
             }
         }
 
+        // Animator for translating the line to show emission
+        val lineTranslateAnimator = ValueAnimator().apply {
+            duration = 900
+            setValues(propertyValueTranslateX)
+            interpolator = LinearInterpolator()
+            addUpdateListener {
+                offset = it.animatedValue as Float
+                invalidate()
+            }
+        }
+
         val animatorSet = AnimatorSet().apply {
             playSequentially(circleYAnimator, scaleAnimation)
+            playTogether(lineTranslateAnimator)
             interpolator = LinearInterpolator()
         }
+
         return Pair(propertyHolderY, animatorSet)
     }
 
