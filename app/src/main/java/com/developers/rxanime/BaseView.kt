@@ -161,11 +161,11 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
             // Initialize the animator Set
             val (propertyHolderY, animatorSet) = initializeAnimator()
             // Repeat the animation 4 times
-            repeat(4) { currentMarbleData ->
+            repeat(5) { currentMarbleData ->
                 animatorSet.start()
                 // Wait for end
                 animatorSet.awaitEnd()
-                offset = 0f
+
                 marbleStartY += Y_OFFSET
                 val currentMarble = MarbleData(leftLineStart, marbleStartY, currentMarbleData)
                 // Dispatch Action and data

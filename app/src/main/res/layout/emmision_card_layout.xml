@@ -14,7 +14,7 @@
         <LinearLayout
             android:id="@+id/streamViewContainer"
             android:layout_width="match_parent"
-            android:layout_height="400dp"
+            android:layout_height="wrap_content"
             android:orientation="vertical"/>
 
         <TextView

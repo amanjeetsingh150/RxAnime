@@ -32,7 +32,9 @@ class CardPagerAdapter : PagerAdapter() {
         val operatorDescriptionTextView = view.findViewById<TextView>(R.id.operatorDescription)
         val streamContainerView = view.findViewById<LinearLayout>(R.id.streamViewContainer)
 
-        streamContainerView.addView(dataList[position].operatorVisualizer)
+        val operatorView = dataList[position].operatorVisualizer
+        operatorView?.parent?.let { (it as ViewGroup).removeView(operatorView) }
+        streamContainerView.addView(operatorView)
         cardView.maxCardElevation = MAX_ELEVATION
         operatorTitleTextView.text = dataList[position].name
         operatorHtmlLinkTextView.text = dataList[position].htmlLink

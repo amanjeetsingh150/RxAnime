@@ -10,16 +10,12 @@ import com.developers.rxanime.util.toPx
 
 class FilterOperatorView(context: Context, attrs: AttributeSet? = null) : BaseView(context = context, attributeSet = attrs) {
 
-    private var cx: Float = 0f
-
     /**
      * Filters even emissions
      */
     override fun drawOperator(canvas: Canvas?, currentData: MarbleData) {
-        this.cx = currentData.cx
         currentData.takeIf { it.data % 2 == 0 }?.apply {
-            Log.d("Base F ", "Evealuated base $offset")
-            canvas?.drawLine(cx + 14.toPx().toFloat(), cy, cx + offset, cy, linePaint)
+            canvas?.drawLine(currentData.cx + 14.toPx().toFloat(), cy, cx + offset, cy, linePaint)
         }
     }
 
