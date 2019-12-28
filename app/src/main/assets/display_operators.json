@@ -5,18 +5,18 @@
       "operators": [
         {
           "name": "Take(3)",
-          "description": "emits only the last n items emitted by an Observable.",
-          "link": "http://reactivex.io/documentation/operators/takelast.html"
+          "description": "emits only the first n items emitted by an Observable.",
+          "link": "http://reactivex.io/documentation/operators/take.html"
         },
         {
           "name": "Filter(even emissions)",
-          "description": "emits only the last n items emitted by an Observable.",
-          "link": "http://reactivex.io/documentation/operators/takelast.html"
+          "description": "emit only those items from an Observable that pass a predicate test.",
+          "link": "http://reactivex.io/documentation/operators/filter.html"
         },
         {
           "name": "Skip(3)",
-          "description": "emits only the last n items emitted by an Observable.",
-          "link": "http://reactivex.io/documentation/operators/takelast.html"
+          "description": "suppress the first n items emitted by an Observable.",
+          "link": "http://reactivex.io/documentation/operators/skip.html"
         },
         {
           "name": "Take Last(2)",
@@ -30,8 +30,8 @@
       "operators": [
         {
           "name": "Map(it->it*2)",
-          "description": "periodically gather items from an Observable into bundles and emit these bundles rather than emitting the items one at a time.",
-          "link": "http://reactivex.io/documentation/operators/buffer.html"
+          "description": "transforms the items emitted by an Observable by applying a function to each item.",
+          "link": "http://reactivex.io/documentation/operators/map.html"
         },
         {
           "name": "Buffer(2)",
