@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.lifecycleScope
 import com.developers.rxanime.model.CardItem
 import com.developers.rxanime.model.FilterOperator
 import com.developers.rxanime.model.OperatorCategory
@@ -21,6 +22,7 @@ import com.jakewharton.rxbinding2.support.v4.view.RxViewPager
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.launch
 import java.io.IOException
 import java.nio.charset.Charset
 
@@ -30,7 +32,7 @@ class RxAnimeActivity : AppCompatActivity() {
     private lateinit var cardPagerAdapter: CardPagerAdapter
 
     private val sharedPreferences by lazy {
-         PreferenceManager.getDefaultSharedPreferences(this)
+        PreferenceManager.getDefaultSharedPreferences(this)
     }
     private val rxSharedPreference by lazy { RxSharedPreferences.create(sharedPreferences) }
     private val selectedCategory by lazy {
@@ -90,14 +92,10 @@ class RxAnimeActivity : AppCompatActivity() {
                     }
                 }
                 .subscribe({ operators ->
-                    Log.d("RxAnime", "onSuccess ")
                     cardPagerAdapter = CardPagerAdapter()
                     cardPagerAdapter.addOperators(operators)
                     viewPager.adapter = cardPagerAdapter
-                }, {
-                    Log.d("RxAnime", "onError ${it.printStackTrace()}")
-                    showError(it)
-                })
+                }, { showError(it) })
 
         disposable += RxViewPager.pageSelections(viewPager)
                 .subscribe({ position ->
@@ -114,6 +112,12 @@ class RxAnimeActivity : AppCompatActivity() {
                         OperatorCategory.FILTER -> {
                             operators?.let {
                                 val currentOperatorName = it[position].name.getOperator<FilterOperator>()
+                                val currentOperator = viewPager.findViewWithTag<BaseView>(currentOperatorName.toString())
+                                currentOperator?.let{
+                                    lifecycleScope.launch {
+                                        currentOperator.restart()
+                                    }
+                                }
                             }
 
                         }

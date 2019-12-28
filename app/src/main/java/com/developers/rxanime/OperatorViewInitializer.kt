@@ -24,10 +24,26 @@ class OperatorViewInitializer(private val categoryList: List<Category>,
                 .forEach {
                     it.operators.forEach { operator ->
                         when (operator.name.getOperator<FilterOperator>()) {
-                            FilterOperator.TAKE -> filterViews.add(FilterOperatorView(context = context))
-                            FilterOperator.FILTER -> filterViews.add(TakeOperatorView(context = context))
-                            FilterOperator.SKIP -> filterViews.add(SkipOperatorView(context = context))
-                            FilterOperator.TAKE_LAST -> filterViews.add(TakeLastOperator(context = context))
+                            FilterOperator.TAKE -> {
+                                val takeOperatorView = TakeOperatorView(context = context)
+                                filterViews.add(takeOperatorView)
+                                takeOperatorView.tag = operator.name.getOperator<FilterOperator>().toString()
+                            }
+                            FilterOperator.FILTER -> {
+                                val filterOperatorView = FilterOperatorView(context = context)
+                                filterViews.add(filterOperatorView)
+                                filterOperatorView.tag = operator.name.getOperator<FilterOperator>().toString()
+                            }
+                            FilterOperator.SKIP -> {
+                                val skipOperatorView = SkipOperatorView(context = context)
+                                filterViews.add(skipOperatorView)
+                                skipOperatorView.tag = operator.name.getOperator<FilterOperator>().toString()
+                            }
+                            FilterOperator.TAKE_LAST -> {
+                                val takeLastOperator = TakeLastOperator(context = context)
+                                filterViews.add(takeLastOperator)
+                                takeLastOperator.tag = operator.name.getOperator<FilterOperator>().toString()
+                            }
                         }
                     }
                 }

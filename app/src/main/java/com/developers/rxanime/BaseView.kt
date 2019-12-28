@@ -11,6 +11,7 @@ import android.graphics.Rect
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import com.developers.rxanime.model.CanvasAction
 import com.developers.rxanime.model.MarbleData
@@ -33,7 +34,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
     private var circleRadius = 5.toPx().toFloat()
 
     private val lineStartY = 10.toPx()
-    val centreDistance = 100.toPx()
+    private val centreDistance = 100.toPx()
     var offset = 0f
     private var marbleStartY = 30.toPx().toFloat()
 
@@ -135,7 +136,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
                 drawOperator(canvas, rxAnimeState.currentData)
             }
             CanvasAction.INITIAL_STATE -> {
-
+                canvas?.drawColor(Color.WHITE)
             }
         }
 
@@ -151,6 +152,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
             drawNumericMarbles(cx = marbles.cx, cy = marbles.cy, number = marbles.data, canvas = canvas)
         }
     }
+
 
     abstract fun drawOperator(canvas: Canvas?, currentData: MarbleData)
 
@@ -185,6 +187,10 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
     }
 
     private fun initializeAnimator(): Pair<PropertyValuesHolder, AnimatorSet> {
+        marbleStartY = 30.toPx().toFloat()
+        circleRadius = 5.toPx().toFloat()
+        offset = 0f
+        marbleList.clear()
         val propertyHolderY = PropertyValuesHolder.ofFloat(MARBLE_TRANSLATION_Y, marbleStartY, marbleStartY + Y_OFFSET)
         val propertyValueScale = PropertyValuesHolder.ofFloat(MARBLE_SCALE_PROPERTY, circleRadius, 10.toPx().toFloat())
         val propertyValueTranslateX = PropertyValuesHolder.ofFloat("X", leftLineStart, centreDistance * 2f)
@@ -215,7 +221,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
         val lineTranslateAnimator = ValueAnimator().apply {
             duration = 900
             setValues(propertyValueTranslateX)
-            interpolator = LinearInterpolator()
+            interpolator = AccelerateDecelerateInterpolator()
             addUpdateListener {
                 offset = it.animatedValue as Float
                 invalidate()
@@ -235,6 +241,12 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
         this.coroutineScope = coroutineScope
     }
 
+    suspend fun restart() {
+        rxAnimeState = rxAnimeState.copy(canvasAction = CanvasAction.INITIAL_STATE)
+        animateMarbles()
+    }
+
+
     companion object {
         private const val MARBLE_SCALE_PROPERTY = "MARBLE_SCALE"
         private const val MARBLE_TRANSLATION_Y = "MARBLE_TRANSLATION"
@@ -242,3 +254,4 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
         private const val TAG = "BaseView"
     }
 }
+
