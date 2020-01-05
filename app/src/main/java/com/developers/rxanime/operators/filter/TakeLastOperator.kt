@@ -18,4 +18,8 @@ class TakeLastOperator(context: Context, attrs: AttributeSet? = null) : BaseView
         }
     }
 
+    override fun addEmissions(currentData: MarbleData) {
+        currentData.takeIf { it.data > 1 }?.apply { emissions.add(this) }
+    }
+
 }

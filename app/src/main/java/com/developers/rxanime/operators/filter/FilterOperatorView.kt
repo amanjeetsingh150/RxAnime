@@ -19,5 +19,9 @@ class FilterOperatorView(context: Context, attrs: AttributeSet? = null) : BaseVi
         }
     }
 
+    override fun addEmissions(currentData: MarbleData) {
+        currentData.takeIf { it.data % 2 == 0 }?.apply { emissions.add(this) }
+    }
+
 
 }

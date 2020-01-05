@@ -1,8 +1,6 @@
 package com.developers.rxanime
 
-import android.animation.AnimatorSet
-import android.animation.PropertyValuesHolder
-import android.animation.ValueAnimator
+import android.animation.*
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -24,10 +22,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.absoluteValue
 import kotlin.math.min
 
 abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(context, attributeSet) {
 
+    private var currentMarble: MarbleData = MarbleData()
     // Animate to move the marble
     private var circleY: Float = 30.toPx().toFloat()
     // Animate to scale the marble radius
@@ -52,6 +52,8 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
 
     private var rxAnimeState = RxAnimeState()
     private val marbleList = mutableListOf<MarbleData>()
+
+    protected val emissions = mutableListOf<MarbleData>()
 
     // TODO: change this by attaching lifecycle from activity/fragment
     var coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
@@ -131,12 +133,13 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
         Log.d(TAG, "State: " + rxAnimeState.canvasAction)
 
         when (rxAnimeState.canvasAction) {
-            CanvasAction.DRAW_OPERATOR -> {
-                drawMovingNumericalMarbles(canvas)
-                drawOperator(canvas, rxAnimeState.currentData)
-            }
             CanvasAction.INITIAL_STATE -> {
                 canvas?.drawColor(Color.WHITE)
+            }
+            CanvasAction.DRAW_OPERATOR_WITH_LINE -> {
+                drawMovingNumericalMarbles(canvas)
+                drawOperator(canvas, rxAnimeState.currentData)
+                drawEmissionLines(canvas, emissions)
             }
         }
 
@@ -153,13 +156,15 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
         }
     }
 
-
     abstract fun drawOperator(canvas: Canvas?, currentData: MarbleData)
+
+    abstract fun addEmissions(currentData: MarbleData)
 
     /**
      * Initializes the animators and start the animation for canvas.
      */
     private suspend fun animateMarbles() {
+        emissions.clear()
         withContext(Dispatchers.Main) {
             // Initialize the animator Set
             val (propertyHolderY, animatorSet) = initializeAnimator()
@@ -169,10 +174,12 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
                 // Wait for end
                 animatorSet.awaitEnd()
 
+                addEmissions(currentMarble)
+
                 marbleStartY += Y_OFFSET
-                val currentMarble = MarbleData(leftLineStart, marbleStartY, currentMarbleData)
+                currentMarble = MarbleData(leftLineStart, marbleStartY, currentMarbleData)
                 // Dispatch Action and data
-                rxAnimeState = rxAnimeState.copy(canvasAction = CanvasAction.DRAW_OPERATOR,
+                rxAnimeState = rxAnimeState.copy(canvasAction = CanvasAction.DRAW_OPERATOR_WITH_LINE,
                         currentData = currentMarble)
                 marbleList.add(currentMarble)
 
@@ -256,6 +263,14 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
     suspend fun restart() {
         rxAnimeState = rxAnimeState.copy(canvasAction = CanvasAction.INITIAL_STATE)
         animateMarbles()
+    }
+
+    private fun drawEmissionLines(canvas: Canvas?, emissions: MutableList<MarbleData>) {
+        if (emissions.isNotEmpty()) {
+            emissions.forEach {
+                canvas?.drawLine(it.cx + 14.toPx(), it.cy, rightLineStart, it.cy, linePaint)
+            }
+        }
     }
 
 

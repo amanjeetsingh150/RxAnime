@@ -1,8 +1,8 @@
 package com.developers.rxanime.model
 
 enum class CanvasAction {
-    DRAW_OPERATOR,
-    INITIAL_STATE
+    INITIAL_STATE,
+    DRAW_OPERATOR_WITH_LINE
 }
 
 data class RxAnimeState(val canvasAction: CanvasAction = CanvasAction.INITIAL_STATE,

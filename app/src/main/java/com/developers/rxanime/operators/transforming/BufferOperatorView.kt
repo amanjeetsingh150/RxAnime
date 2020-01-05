@@ -11,4 +11,8 @@ class BufferOperatorView(context: Context, attrs: AttributeSet? = null) : BaseVi
     override fun drawOperator(canvas: Canvas?, currentData: MarbleData) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
+
+    override fun addEmissions(currentData: MarbleData) {
+
+    }
 }

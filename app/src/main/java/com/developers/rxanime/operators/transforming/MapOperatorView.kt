@@ -13,4 +13,8 @@ class MapOperatorView(context: Context, attrs: AttributeSet? = null) : BaseView(
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    override fun addEmissions(currentData: MarbleData) {
+
+    }
+
 }
