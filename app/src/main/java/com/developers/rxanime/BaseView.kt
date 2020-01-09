@@ -156,8 +156,15 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
         }
     }
 
+
+    /**
+     * Draws a translated line for emission of data in operator
+     */
     abstract fun drawOperator(canvas: Canvas?, currentData: MarbleData)
 
+    /**
+     * Adds emitted [MarbleData] in a list
+     */
     abstract fun addEmissions(currentData: MarbleData)
 
     /**
@@ -188,6 +195,9 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
         }
     }
 
+    /**
+     * Draws a marble with numerical text in centre
+     */
     private fun drawNumericMarbles(cx: Float, cy: Float, number: Int, canvas: Canvas?) {
         val text = number.toString()
         canvas?.drawCircle(cx, cy, 15.toPx().toFloat(), marblePaint)
@@ -265,6 +275,9 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
         animateMarbles()
     }
 
+    /**
+     * Draws a static line on canvas after a data emission.
+     */
     private fun drawEmissionLines(canvas: Canvas?, emissions: MutableList<MarbleData>) {
         if (emissions.isNotEmpty()) {
             emissions.forEach {
