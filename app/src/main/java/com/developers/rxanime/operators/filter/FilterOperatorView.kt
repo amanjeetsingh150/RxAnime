@@ -16,6 +16,7 @@ class FilterOperatorView(context: Context, attrs: AttributeSet? = null) : BaseVi
     override fun drawOperator(canvas: Canvas?, currentData: MarbleData) {
         currentData.takeIf { it.data % 2 == 0 }?.apply {
             canvas?.drawLine(currentData.cx + 14.toPx().toFloat(), cy, cx + offset, cy, linePaint)
+            canvas?.drawCircle(rightLineStart, cy, rightCircleRadius, leftCirclePaint)
         }
     }
 

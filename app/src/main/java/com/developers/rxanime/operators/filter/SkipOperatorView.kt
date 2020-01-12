@@ -15,6 +15,7 @@ class SkipOperatorView(context: Context, attrs: AttributeSet? = null) : BaseView
     override fun drawOperator(canvas: Canvas?, currentData: MarbleData) {
         currentData.takeIf { it.data > 2 }?.apply {
             canvas?.drawLine(currentData.cx + 14.toPx().toFloat(), cy, cx + offset, cy, linePaint)
+            canvas?.drawCircle(rightLineStart, cy, rightCircleRadius, leftCirclePaint)
         }
     }
 

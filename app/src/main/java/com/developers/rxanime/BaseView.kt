@@ -18,11 +18,7 @@ import com.developers.rxanime.util.awaitEnd
 import com.developers.rxanime.util.awaitViewDrawn
 import com.developers.rxanime.util.spToPx
 import com.developers.rxanime.util.toPx
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlin.math.absoluteValue
+import kotlinx.coroutines.*
 import kotlin.math.min
 
 abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(context, attributeSet) {
@@ -30,8 +26,10 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
     private var currentMarble: MarbleData = MarbleData()
     // Animate to move the marble
     private var circleY: Float = 30.toPx().toFloat()
-    // Animate to scale the marble radius
-    private var circleRadius = 5.toPx().toFloat()
+    // Animate to scale the left marble radius
+    private var leftCircleRadius = 5.toPx().toFloat()
+    // Animate to scale the right marble radius
+    var rightCircleRadius = 0.toPx().toFloat()
 
     private val lineStartY = 10.toPx()
     private val centreDistance = 100.toPx()
@@ -44,7 +42,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
     var rightLineStart = 0f
 
     val linePaint = Paint()
-    private val leftCirclePaint = Paint()
+    val leftCirclePaint = Paint()
     private val marblePaint = Paint()
     private val textPaint = Paint()
 
@@ -128,7 +126,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
         canvas?.drawLine(leftLineStart, lineStartY.toFloat(), leftLineStart, height.toFloat(), linePaint)
         canvas?.drawLine(rightLineStart, lineStartY.toFloat(), rightLineStart, height.toFloat(), linePaint)
         // Draw Translating marble
-        canvas?.drawCircle(leftLineStart, circleY, circleRadius, leftCirclePaint)
+        canvas?.drawCircle(leftLineStart, circleY, leftCircleRadius, leftCirclePaint)
 
         Log.d(TAG, "State: " + rxAnimeState.canvasAction)
 
@@ -139,7 +137,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
             CanvasAction.DRAW_OPERATOR_WITH_LINE -> {
                 drawMovingNumericalMarbles(canvas)
                 drawOperator(canvas, rxAnimeState.currentData)
-                drawEmissionLines(canvas, emissions)
+                drawEmission(canvas, emissions)
             }
         }
 
@@ -209,17 +207,19 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
     /**
      * Initializes the following animators and sets up with a [AnimatorSet]:
      * 1. CircleAnimator: Translates the Y coordinate of marble i.e property [circleY].
-     * 2. ScaleAnimator: Scales radius of a marble i.e property [circleRadius].
+     * 2. ScaleAnimator: Scales radius of a marble i.e property [leftCircleRadius].
      * 3. LineTranslateAnimator: Line translation of the emissions with a [offset].
      */
     private fun initializeAnimator(): Pair<PropertyValuesHolder, AnimatorSet> {
         marbleStartY = 30.toPx().toFloat()
-        circleRadius = 5.toPx().toFloat()
+        leftCircleRadius = 5.toPx().toFloat()
+        rightCircleRadius = 0.toPx().toFloat()
         offset = 0f
         marbleList.clear()
         val propertyHolderY = PropertyValuesHolder.ofFloat(MARBLE_TRANSLATION_Y, marbleStartY, marbleStartY + Y_OFFSET)
-        val propertyValueScale = PropertyValuesHolder.ofFloat(MARBLE_SCALE_PROPERTY, circleRadius, 10.toPx().toFloat())
+        val propertyLeftCircleScale = PropertyValuesHolder.ofFloat(MARBLE_SCALE_PROPERTY, leftCircleRadius, 10.toPx().toFloat())
         val propertyValueTranslateX = PropertyValuesHolder.ofFloat(EMISSION_OFFSET_X, leftLineStart, centreDistance * 2f)
+        val propertyRightCircleScale = PropertyValuesHolder.ofFloat(MARBLE_SCALE_PROPERTY, rightCircleRadius, 10.toPx().toFloat())
 
         // Animator for Y coordinate of marble
         val circleYAnimator = ValueAnimator().apply {
@@ -233,12 +233,22 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
         }
 
         // Animator for scaling marble
-        val scaleAnimation = ValueAnimator().apply {
+        val leftMarbleScaleAnimation = ValueAnimator().apply {
             duration = 300
-            setValues(propertyValueScale)
+            setValues(propertyLeftCircleScale)
             interpolator = LinearInterpolator()
             addUpdateListener {
-                circleRadius = it.animatedValue as Float
+                leftCircleRadius = it.animatedValue as Float
+                invalidate()
+            }
+        }
+
+        val rightMarbleScaleAnimator = ValueAnimator().apply {
+            duration = 400
+            setValues(propertyRightCircleScale)
+            interpolator = LinearInterpolator()
+            addUpdateListener {
+                rightCircleRadius = it.animatedValue as Float
                 invalidate()
             }
         }
@@ -254,13 +264,18 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
             }
         }
 
-        val animatorSet = AnimatorSet().apply {
-            playSequentially(circleYAnimator, scaleAnimation)
-            playTogether(lineTranslateAnimator)
+        val lineMarbleAnimatorSet = AnimatorSet().apply {
+            playSequentially(lineTranslateAnimator, rightMarbleScaleAnimator)
             interpolator = LinearInterpolator()
         }
 
-        return Pair(propertyHolderY, animatorSet)
+        val marbleAnimatorSet = AnimatorSet().apply {
+            playSequentially(circleYAnimator, leftMarbleScaleAnimation)
+            playTogether(lineMarbleAnimatorSet)
+            interpolator = LinearInterpolator()
+        }
+
+        return Pair(propertyHolderY, marbleAnimatorSet)
     }
 
     fun attachScope(coroutineScope: CoroutineScope) {
@@ -276,16 +291,16 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
     }
 
     /**
-     * Draws a static line on canvas after a data emission.
+     * Draws a static line and emitted marble on canvas after a data emission.
      */
-    private fun drawEmissionLines(canvas: Canvas?, emissions: MutableList<MarbleData>) {
+    private fun drawEmission(canvas: Canvas?, emissions: MutableList<MarbleData>) {
         if (emissions.isNotEmpty()) {
             emissions.forEach {
                 canvas?.drawLine(it.cx + 14.toPx(), it.cy, rightLineStart, it.cy, linePaint)
+                drawNumericMarbles(cx = rightLineStart, cy = it.cy, number = it.data, canvas = canvas)
             }
         }
     }
-
 
     companion object {
         private const val MARBLE_SCALE_PROPERTY = "MARBLE_SCALE"
