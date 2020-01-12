@@ -6,19 +6,9 @@ import com.squareup.moshi.JsonClass
 
 enum class OperatorCategory {
     @Json(name = "Filtering")
-    FILTER {
-        override fun getOperators(): Operator {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
-    },
+    FILTER,
     @Json(name = "Transforming")
-    TRANSFORMING {
-        override fun getOperators(): Operator {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
-    };
-
-    abstract fun getOperators(): Operator
+    TRANSFORMING
 }
 
 interface BaseOperator {
