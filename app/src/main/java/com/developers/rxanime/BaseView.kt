@@ -54,7 +54,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
     protected val emissions = mutableListOf<MarbleData>()
 
     // TODO: change this by attaching lifecycle from activity/fragment
-    var coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
+    private var coroutineScope = CoroutineScope(Dispatchers.Default)
 
     init {
         linePaint.apply {
@@ -171,7 +171,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
     private suspend fun animateMarbles() {
         emissions.clear()
         withContext(Dispatchers.Main) {
-            // Initialize the animator Set
+
             val (propertyHolderY, animatorSet) = initializeAnimator()
             // Repeat the animation 5 times
             repeat(5) { currentMarbleData ->
@@ -210,10 +210,8 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
         rxFrame = RxFrame(leftMarble = leftMarble, emissionLineX = 0f)
         marbleList.clear()
 
-        // Create Animator
         val rxAnimation = RxAnimation.Builder()
-                .leftMarbleRadius(leftMarble.radius)
-                .leftMarbleY(leftMarble.cy)
+                .leftMarble(leftMarble)
                 .emissionLineOffset(rxFrame.emissionLineX)
                 .leftLineStart(leftLineStart)
                 .rightMarbleRadius(rightCircleRadius)

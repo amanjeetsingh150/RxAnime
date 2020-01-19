@@ -10,6 +10,7 @@ import com.developers.rxanime.util.toPx
 
 class FilterOperatorView(context: Context, attrs: AttributeSet? = null) : BaseView(context = context, attributeSet = attrs) {
 
+
     /**
      * Filters even emissions
      */

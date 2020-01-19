@@ -44,9 +44,6 @@ class RxAnimeActivity : AppCompatActivity() {
     private val disposable = CompositeDisposable()
 
     companion object {
-        const val RX_PREFERENCE_NAME = "RX_PREFERENCES"
-        const val FILTER_OPERATOR_SHOW = "FILTER_OPERATORS"
-        const val TRANSFORMING_OPERATOR_SHOW = "TRANSFORM_OPERATORS"
         private const val CURRENT_SELECTION = "CURRENT_OPERATOR_CATEGORY"
         private const val RX_ANIME_PREFERENCES = "RX_ANIME_PREFS"
     }
@@ -113,7 +110,7 @@ class RxAnimeActivity : AppCompatActivity() {
                             operators?.let {
                                 val currentOperatorName = it[position].name.getOperator<FilterOperator>()
                                 val currentOperator = viewPager.findViewWithTag<BaseView>(currentOperatorName.toString())
-                                currentOperator?.let{
+                                currentOperator?.let {
                                     lifecycleScope.launch {
                                         currentOperator.restart()
                                     }
@@ -142,7 +139,7 @@ class RxAnimeActivity : AppCompatActivity() {
      * @param it Throwable to get the error message.
      */
     private fun showError(it: Throwable) {
-        Toast.makeText(this, "Abey: "+it.message, Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Abey: " + it.message, Toast.LENGTH_SHORT).show()
     }
 
     private fun loadJSONFromAsset(): String {

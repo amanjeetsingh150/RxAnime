@@ -5,6 +5,7 @@ import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.LinearInterpolator
+import com.developers.rxanime.model.MarbleData
 import com.developers.rxanime.util.toPx
 
 interface RxAnimationCallbacks {
@@ -16,40 +17,41 @@ interface RxAnimationCallbacks {
 
 /**
  * Initializes the following animators and sets up with a [AnimatorSet]:
- * 1. CircleAnimator: Translates the Y coordinate of marble i.e property [RxAnimation.leftMarbleY].
- * 2. ScaleAnimator: Scales radius of left marble i.e property [RxAnimation.leftMarbleRadius].
+ * 1. CircleAnimator: Translates the Y coordinate of marble i.e property [MarbleData.cy] of [leftMarble].
+ * 2. Left Marble ScaleAnimator: Scales radius of left marble i.e property property [MarbleData.radius] of [leftMarble].
  * 3. LineTranslateAnimator: Line translation of the emissions with a [RxAnimation.emissionLineOffset].
  * 4. Right Marble ScaleAnimator: Scale radius of right marble i.e property [RxAnimation.rightMarbleRadius]
  */
-class RxAnimation(private var leftMarbleY: Float,
-                  private var leftMarbleRadius: Float,
-                  private var emissionLineOffset: Float,
+class RxAnimation(private var emissionLineOffset: Float,
                   private var rightMarbleRadius: Float,
                   private var leftLineStartX: Float,
+                  private var leftMarble: MarbleData?,
                   private var rxAnimationCallbacks: RxAnimationCallbacks?) {
 
+    private lateinit var propertyHolderY: PropertyValuesHolder
+    private lateinit var propertyLeftCircleScale: PropertyValuesHolder
 
-    data class Builder(var leftMarbleY: Float = 0f,
-                       var leftMarbleRadius: Float = 0f,
-                       var emissionLineOffset: Float = 0f,
+    data class Builder(var emissionLineOffset: Float = 0f,
                        var rightMarbleRadius: Float = 0f,
                        var leftLineStartX: Float = 0f,
+                       var leftMarble: MarbleData? = null,
                        var rxAnimationCallbacks: RxAnimationCallbacks? = null) {
 
-        fun leftMarbleY(leftMarbleY: Float) = apply { this.leftMarbleY = leftMarbleY }
-        fun leftMarbleRadius(leftMarbleRadius: Float) = apply { this.leftMarbleRadius = leftMarbleRadius }
         fun emissionLineOffset(emissionLineOffset: Float) = apply { this.emissionLineOffset = emissionLineOffset }
         fun rightMarbleRadius(rightMarbleRadius: Float) = apply { this.rightMarbleRadius = rightMarbleRadius }
+        fun leftMarble(leftMarble: MarbleData?) = apply { this.leftMarble = leftMarble }
         fun rxAnimationCallback(rxAnimationCallbacks: RxAnimationCallbacks?) = apply { this.rxAnimationCallbacks = rxAnimationCallbacks }
         fun leftLineStart(leftLineStartX: Float) = apply { this.leftLineStartX = leftLineStartX }
 
-        fun build() = RxAnimation(leftMarbleY, leftMarbleRadius,
-                emissionLineOffset, rightMarbleRadius, leftLineStartX, rxAnimationCallbacks)
+        fun build() = RxAnimation(emissionLineOffset, rightMarbleRadius,
+                leftLineStartX, leftMarble, rxAnimationCallbacks)
     }
 
     fun createAnimator(): Pair<PropertyValuesHolder, AnimatorSet> {
-        val propertyHolderY = PropertyValuesHolder.ofFloat(MARBLE_TRANSLATION_Y, leftMarbleY, leftMarbleY + Y_OFFSET)
-        val propertyLeftCircleScale = PropertyValuesHolder.ofFloat(MARBLE_SCALE_PROPERTY, leftMarbleRadius, 10.toPx().toFloat())
+        leftMarble?.let {
+            propertyHolderY = PropertyValuesHolder.ofFloat(MARBLE_TRANSLATION_Y, it.cy, it.cy + Y_OFFSET)
+            propertyLeftCircleScale = PropertyValuesHolder.ofFloat(MARBLE_SCALE_PROPERTY, it.radius, 10.toPx().toFloat())
+        }
         val propertyValueTranslateX = PropertyValuesHolder.ofFloat(EMISSION_OFFSET_X, leftLineStartX, 100.toPx() * 2f)
         val propertyRightCircleScale = PropertyValuesHolder.ofFloat(MARBLE_SCALE_PROPERTY, rightMarbleRadius, 10.toPx().toFloat())
 
@@ -59,9 +61,11 @@ class RxAnimation(private var leftMarbleY: Float,
             duration = 900
             setValues(propertyHolderY)
             interpolator = LinearInterpolator()
-            addUpdateListener {
-                leftMarbleY = it.animatedValue as Float
-                rxAnimationCallbacks?.updateLeftMarbleY(leftMarbleY)
+            addUpdateListener { valueAnimator ->
+                leftMarble?.let {
+                    it.cy = valueAnimator.animatedValue as Float
+                    rxAnimationCallbacks?.updateLeftMarbleY(it.cy)
+                }
             }
         }
 
@@ -70,9 +74,11 @@ class RxAnimation(private var leftMarbleY: Float,
             duration = 300
             setValues(propertyLeftCircleScale)
             interpolator = LinearInterpolator()
-            addUpdateListener {
-                leftMarbleRadius = it.animatedValue as Float
-                rxAnimationCallbacks?.updateLeftMarbleRadius(leftMarbleRadius)
+            addUpdateListener { valueAnimator ->
+                leftMarble?.let {
+                    it.radius = valueAnimator.animatedValue as Float
+                    rxAnimationCallbacks?.updateLeftMarbleRadius(it.radius)
+                }
             }
         }
 
