@@ -14,7 +14,7 @@ class SkipOperatorView(context: Context, attrs: AttributeSet? = null) : BaseView
      */
     override fun drawOperator(canvas: Canvas?, currentData: MarbleData) {
         currentData.takeIf { it.data > 2 }?.apply {
-            canvas?.drawLine(currentData.cx + 14.toPx().toFloat(), cy, cx + offset, cy, linePaint)
+            canvas?.drawLine(currentData.cx + 14.toPx().toFloat(), cy, cx + rxFrame.emissionLineX, cy, linePaint)
             canvas?.drawCircle(rightLineStart, cy, rightCircleRadius, leftCirclePaint)
         }
     }
@@ -22,5 +22,4 @@ class SkipOperatorView(context: Context, attrs: AttributeSet? = null) : BaseView
     override fun addEmissions(currentData: MarbleData) {
         currentData.takeIf { it.data > 2 }?.apply { emissions.add(this) }
     }
-
 }
