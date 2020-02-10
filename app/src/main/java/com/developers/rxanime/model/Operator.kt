@@ -42,11 +42,7 @@ enum class Transforming : BaseOperator {
 @JsonClass(generateAdapter = true)
 data class Operator(@Json(name = "name") val name: String,
                     @Json(name = "description") val description: String = "",
-                    @Json(name = "link") val operatorLink: String = "",
-                    @Json(name = "meta") val meta: Meta)
-
-@JsonClass(generateAdapter = true)
-data class Meta(@Json(name = "condition") val condition: String)
+                    @Json(name = "link") val operatorLink: String = "")
 
 @JsonClass(generateAdapter = true)
 data class Category(@Json(name = "name") val name: OperatorCategory,

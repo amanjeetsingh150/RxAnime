@@ -139,7 +139,7 @@ class RxAnimeActivity : AppCompatActivity() {
      * @param it Throwable to get the error message.
      */
     private fun showError(it: Throwable) {
-        Toast.makeText(this, "Abey: " + it.message, Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Error: " + it.message, Toast.LENGTH_SHORT).show()
     }
 
     private fun loadJSONFromAsset(): String {

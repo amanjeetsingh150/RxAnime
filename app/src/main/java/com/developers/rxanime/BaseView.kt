@@ -37,7 +37,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
     private val centreDistance = 100.toPx()
 
     // To be assigned once view is drawn
-    var leftLineStart = 0f
+    private var leftLineStart = 0f
     // To be assigned once view is drawn
     var rightLineStart = 0f
 
