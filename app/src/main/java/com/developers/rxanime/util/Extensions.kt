@@ -7,17 +7,12 @@ import android.util.TypedValue
 import android.view.View
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
-import com.developers.rxanime.model.BaseOperator as Base
+import com.developers.rxanime.model.Operators as Base
 
 fun Int.toPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
 
 fun Int.spToPx(): Int = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, this.toFloat(),
         Resources.getSystem().displayMetrics).toInt()
-
-
-inline fun <reified BaseOperator : Enum<BaseOperator>> String.getOperator(): BaseOperator? {
-    return enumValues<BaseOperator>().firstOrNull { (it as Base).getOperatorName() == this }
-}
 
 suspend fun Animator.awaitEnd() = suspendCancellableCoroutine<Unit> { cont ->
 

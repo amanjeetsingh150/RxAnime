@@ -1,5 +1,7 @@
 package com.developers.rxanime.viewpager
 
+import android.content.Context
+import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,38 +9,44 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.viewpager.widget.PagerAdapter
+import com.developers.rxanime.BaseView
 import com.developers.rxanime.R
-import com.developers.rxanime.model.CardItem
+import com.developers.rxanime.model.Operators
 
 class CardPagerAdapter : PagerAdapter() {
 
-    private lateinit var dataList: List<CardItem>
+    private lateinit var operatorList: List<Operators>
 
     override fun isViewFromObject(view: View, anyObject: Any): Boolean {
         return view == anyObject
     }
 
     override fun getCount(): Int {
-        return dataList.size
+        return operatorList.size
     }
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val view = LayoutInflater.from(container.context).inflate(R.layout.emmision_card_layout, container, false)
         container.addView(view)
-        val cardView = view.findViewById<CardView>(R.id.cardView)
 
+        val cardView = view.findViewById<CardView>(R.id.cardView)
         val operatorTitleTextView = view.findViewById<TextView>(R.id.operatorName)
         val operatorHtmlLinkTextView = view.findViewById<TextView>(R.id.operatorHtmlLink)
         val operatorDescriptionTextView = view.findViewById<TextView>(R.id.operatorDescription)
         val streamContainerView = view.findViewById<LinearLayout>(R.id.streamViewContainer)
 
-        val operatorView = dataList[position].operatorVisualizer
-        operatorView?.parent?.let { (it as ViewGroup).removeView(operatorView) }
+        val operator = operatorList[position]
+        val operatorClass = operator.getView()
+        val operatorView = operatorClass
+                .getDeclaredConstructor(Context::class.java, AttributeSet::class.java)
+                .newInstance(container.context, null) as BaseView
+        operatorView.tag = operator.getOperatorName()
+        operatorView.parent?.let { (it as ViewGroup).removeView(operatorView) }
         streamContainerView.addView(operatorView)
         cardView.maxCardElevation = MAX_ELEVATION
-        operatorTitleTextView.text = dataList[position].name
-        operatorHtmlLinkTextView.text = dataList[position].htmlLink
-        operatorDescriptionTextView.text = dataList[position].description
+        operatorTitleTextView.text = operator.getOperatorName()
+        operatorHtmlLinkTextView.text = container.context.getString(operator.getOperatorLink())
+        operatorDescriptionTextView.text = container.context.getString(operator.getOperatorDescription())
         return view
     }
 
@@ -50,8 +58,8 @@ class CardPagerAdapter : PagerAdapter() {
         container.removeView(`object` as View)
     }
 
-    fun addOperators(operators: List<CardItem>) {
-        this.dataList = operators
+    fun addOperators(operators: List<Operators>) {
+        this.operatorList = operators
     }
 
     companion object {

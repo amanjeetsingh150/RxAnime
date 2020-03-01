@@ -17,6 +17,7 @@ object Versions {
 
     val appcompat = "1.1.0"
     val cardview = "1.0.0"
+    val preference = "1.1.0"
 
     val constraintLayout = "1.1.3"
     // Rx
@@ -70,6 +71,7 @@ object SupportLibraries {
     val appcompat = "androidx.appcompat:appcompat:${Versions.appcompat}"
     val cardView = "androidx.cardview:cardview:${Versions.cardview}"
     val constraintLayout = "androidx.constraintlayout:constraintlayout:${Versions.constraintLayout}"
+    val preferences = "androidx.preference:preference-ktx:${Versions.preference}"
 }
 
 object TestLibraries {

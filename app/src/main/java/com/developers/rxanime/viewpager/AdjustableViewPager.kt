@@ -1,14 +1,9 @@
 package com.developers.rxanime.viewpager
 
 import android.content.Context
-import androidx.viewpager.widget.ViewPager
 import android.util.AttributeSet
 import android.util.DisplayMetrics
-import android.util.Log
 import android.util.TypedValue
-import android.view.View
-import android.view.ViewGroup
-import com.developers.rxanime.model.Category
 
 class AdjustableViewPager(context: Context, attributeSet: AttributeSet?) : androidx.viewpager.widget.ViewPager(context, attributeSet) {
 

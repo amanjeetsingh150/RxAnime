@@ -28,6 +28,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
 
     private var currentMarble: MarbleData = MarbleData()
     private var leftMarble = MarbleData()
+    private lateinit var currentAnimatorSet: AnimatorSet
     lateinit var rxFrame: RxFrame
 
     // Animate to scale the right marble radius
@@ -173,6 +174,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
         withContext(Dispatchers.Main) {
 
             val (propertyHolderY, animatorSet) = initializeAnimator()
+            currentAnimatorSet = animatorSet
             // Repeat the animation 5 times
             repeat(5) { currentMarbleData ->
                 animatorSet.start()
@@ -230,6 +232,7 @@ abstract class BaseView(context: Context, attributeSet: AttributeSet?) : View(co
      *  Restarts the animation on canvas
      */
     suspend fun restart() {
+        if (::currentAnimatorSet.isInitialized) currentAnimatorSet.cancel()
         rxAnimeState = rxAnimeState.copy(canvasAction = CanvasAction.INITIAL_STATE)
         animateMarbles()
     }

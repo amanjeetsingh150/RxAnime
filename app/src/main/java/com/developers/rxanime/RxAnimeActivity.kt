@@ -1,19 +1,14 @@
 package com.developers.rxanime
 
 import android.os.Bundle
-import android.preference.PreferenceManager
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.lifecycleScope
-import com.developers.rxanime.model.CardItem
-import com.developers.rxanime.model.FilterOperator
+import androidx.preference.PreferenceManager
 import com.developers.rxanime.model.OperatorCategory
-import com.developers.rxanime.model.Transforming
-import com.developers.rxanime.util.getOperator
 import com.developers.rxanime.util.toPx
 import com.developers.rxanime.viewpager.CardPagerAdapter
 import com.developers.rxanime.viewpager.CardsPagerTransformer
@@ -23,23 +18,16 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.launch
-import java.io.IOException
-import java.nio.charset.Charset
 
 
 class RxAnimeActivity : AppCompatActivity() {
 
     private lateinit var cardPagerAdapter: CardPagerAdapter
-
-    private val sharedPreferences by lazy {
-        PreferenceManager.getDefaultSharedPreferences(this)
-    }
-    private val rxSharedPreference by lazy { RxSharedPreferences.create(sharedPreferences) }
-    private val selectedCategory by lazy {
-        rxSharedPreference.getString(RX_ANIME_PREFERENCES, OperatorCategory.FILTER.toString())
-    }
-    private lateinit var operatorViewInitializer: OperatorViewInitializer
     private lateinit var mainViewModel: RxAnimeViewModel
+
+    private val sharedPreferences by lazy { PreferenceManager.getDefaultSharedPreferences(this) }
+    private val rxSharedPreference by lazy { RxSharedPreferences.create(sharedPreferences) }
+    private val selectedCategory by lazy { rxSharedPreference.getString(RX_ANIME_PREFERENCES, OperatorCategory.FILTER.toString()) }
 
     private val disposable = CompositeDisposable()
 
@@ -54,40 +42,8 @@ class RxAnimeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         mainViewModel = ViewModelProviders.of(this).get(RxAnimeViewModel::class.java)
-        val displayData = mainViewModel.fetchCategories(loadJSONFromAsset())
-        val categoryList = displayData?.displayData?.apply {
-            operatorViewInitializer = OperatorViewInitializer(this, this@RxAnimeActivity)
-        }
         disposable += selectedCategory.asObservable()
-                .map {
-                    val initialCardItems = mainViewModel.fetchCurrentOperators(categoryList = categoryList)
-                    when (OperatorCategory.valueOf(it)) {
-                        OperatorCategory.FILTER -> {
-                            val filterViews = operatorViewInitializer.fetchFilterViews()
-                            return@map initialCardItems.asSequence()
-                                    .filter { operator -> operator.operatorCategory == OperatorCategory.FILTER }
-                                    .mapIndexed { position, operator ->
-                                        CardItem(name = operator.name,
-                                                description = operator.description,
-                                                htmlLink = operator.htmlLink,
-                                                operatorVisualizer = filterViews[position],
-                                                operatorCategory = OperatorCategory.FILTER)
-                                    }.toList()
-                        }
-                        OperatorCategory.TRANSFORMING -> {
-                            val transformingViews = operatorViewInitializer.fetchTransformingViews()
-                            return@map initialCardItems.asSequence()
-                                    .filter { operator -> operator.operatorCategory == OperatorCategory.FILTER }
-                                    .mapIndexed { position, operator ->
-                                        CardItem(name = operator.name,
-                                                description = operator.description,
-                                                htmlLink = operator.htmlLink,
-                                                operatorVisualizer = transformingViews[position],
-                                                operatorCategory = OperatorCategory.TRANSFORMING)
-                                    }.toList()
-                        }
-                    }
-                }
+                .map { mainViewModel.getOperators(OperatorCategory.valueOf(it)) }
                 .subscribe({ operators ->
                     cardPagerAdapter = CardPagerAdapter()
                     cardPagerAdapter.addOperators(operators)
@@ -96,32 +52,22 @@ class RxAnimeActivity : AppCompatActivity() {
 
         disposable += RxViewPager.pageSelections(viewPager)
                 .subscribe({ position ->
-                    // get current selection and index
                     val currentSelection = sharedPreferences.getString(CURRENT_SELECTION, OperatorCategory.FILTER.toString())
-                    val currentCategoryIndex = OperatorCategory.valueOf(currentSelection!!).ordinal
 
-                    // get current category and its operators
-                    val currentCategory = categoryList?.get(currentCategoryIndex)
-                    val operators = currentCategory?.operators
-
-                    when (OperatorCategory.valueOf(currentSelection)) {
+                    when (OperatorCategory.valueOf(currentSelection!!)) {
 
                         OperatorCategory.FILTER -> {
-                            operators?.let {
-                                val currentOperatorName = it[position].name.getOperator<FilterOperator>()
-                                val currentOperator = viewPager.findViewWithTag<BaseView>(currentOperatorName.toString())
-                                currentOperator?.let {
-                                    lifecycleScope.launch {
-                                        currentOperator.restart()
-                                    }
+                            val operatorList = mainViewModel.getOperators(OperatorCategory.FILTER)
+                            val currentOperator = viewPager.findViewWithTag<BaseView>(operatorList[position].getOperatorName())
+                            currentOperator?.let {
+                                lifecycleScope.launch {
+                                    currentOperator.restart()
                                 }
                             }
 
                         }
-                        OperatorCategory.TRANSFORMING -> {
-                            operators?.let {
-                                val currentOperatorName = it[position].name.getOperator<Transforming>()
-                            }
+                        OperatorCategory.TRANSFORM -> {
+
                         }
                     }
                 }, { showError(it) })
@@ -142,23 +88,6 @@ class RxAnimeActivity : AppCompatActivity() {
         Toast.makeText(this, "Error: " + it.message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun loadJSONFromAsset(): String {
-        val json: String?
-        try {
-            val displayJsonStream = assets.open("display_operators.json")
-            val size = displayJsonStream.available()
-            val buffer = ByteArray(size)
-            displayJsonStream.read(buffer)
-            displayJsonStream.close()
-            json = String(buffer, Charset.defaultCharset())
-        } catch (ex: IOException) {
-            ex.printStackTrace()
-            return ""
-        }
-
-        return json
-    }
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
@@ -173,7 +102,7 @@ class RxAnimeActivity : AppCompatActivity() {
         return when (item?.itemId) {
             R.id.transforming_operators -> {
                 sharedPreferences.edit().apply {
-                    putString(CURRENT_SELECTION, OperatorCategory.TRANSFORMING.toString())
+                    putString(CURRENT_SELECTION, OperatorCategory.TRANSFORM.toString())
                     apply()
                 }
                 true
