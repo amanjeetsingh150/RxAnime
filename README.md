@@ -1,7 +1,7 @@
 # RxAnime
 An android app to understand about the effect of RxJava operators on data stream. 
 
-<img src = "https://user-images.githubusercontent.com/12881364/49330949-f69d6600-f5bb-11e8-8518-14b037d704d8.gif"/>&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://user-images.githubusercontent.com/12881364/49701884-df8ff100-fc17-11e8-866d-e982ae9d3417.gif"/>
+<img src = "https://user-images.githubusercontent.com/12881364/76144766-91cb9800-60a9-11ea-8e18-117571d14b37.gif"/>&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://user-images.githubusercontent.com/12881364/76145323-7f079200-60ae-11ea-8d48-a72e3340129a.gif"/>
 <br>
 Operators done:
 <UL>
