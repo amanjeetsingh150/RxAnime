@@ -5,6 +5,8 @@ import com.developers.rxanime.operators.filter.FilterOperatorView
 import com.developers.rxanime.operators.filter.SkipOperatorView
 import com.developers.rxanime.operators.filter.TakeLastOperator
 import com.developers.rxanime.operators.filter.TakeOperatorView
+import com.developers.rxanime.operators.transforming.BufferOperatorView
+import com.developers.rxanime.operators.transforming.MapOperatorView
 
 enum class OperatorCategory {
     FILTER,
@@ -50,16 +52,12 @@ enum class TransformingOperators : Operators {
         override fun getOperatorName() = "Map(it->it*2)"
         override fun getOperatorDescription() = R.string.map_operator_desc
         override fun getOperatorLink() = R.string.map_operator_link
-        override fun getView(): Class<*> {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
+        override fun getView() = MapOperatorView::class.java
     },
     BUFFER {
         override fun getOperatorName() = "Buffer(2)"
         override fun getOperatorDescription() = R.string.buffer_operator_desc
         override fun getOperatorLink() = R.string.buffer_operator_link
-        override fun getView(): Class<*> {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
+        override fun getView() = BufferOperatorView::class.java
     };
 }

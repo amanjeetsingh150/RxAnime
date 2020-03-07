@@ -15,7 +15,7 @@ import com.developers.rxanime.model.Operators
 
 class CardPagerAdapter : PagerAdapter() {
 
-    private lateinit var operatorList: List<Operators>
+    private lateinit var operatorList: MutableList<Operators>
 
     override fun isViewFromObject(view: View, anyObject: Any): Boolean {
         return view == anyObject
@@ -59,7 +59,10 @@ class CardPagerAdapter : PagerAdapter() {
     }
 
     fun addOperators(operators: List<Operators>) {
-        this.operatorList = operators
+        if (::operatorList.isInitialized && operatorList.isNotEmpty()) {
+            operatorList.clear()
+        }
+        this.operatorList = operators.toMutableList()
     }
 
     companion object {

@@ -27,13 +27,12 @@ class RxAnimeActivity : AppCompatActivity() {
 
     private val sharedPreferences by lazy { PreferenceManager.getDefaultSharedPreferences(this) }
     private val rxSharedPreference by lazy { RxSharedPreferences.create(sharedPreferences) }
-    private val selectedCategory by lazy { rxSharedPreference.getString(RX_ANIME_PREFERENCES, OperatorCategory.FILTER.toString()) }
+    private val selectedCategory by lazy { rxSharedPreference.getString(CURRENT_SELECTION, OperatorCategory.FILTER.toString()) }
 
     private val disposable = CompositeDisposable()
 
     companion object {
         private const val CURRENT_SELECTION = "CURRENT_OPERATOR_CATEGORY"
-        private const val RX_ANIME_PREFERENCES = "RX_ANIME_PREFS"
     }
 
     private val cardsPagerTransformer = CardsPagerTransformer(5, 10, 0.6f)
@@ -45,9 +44,14 @@ class RxAnimeActivity : AppCompatActivity() {
         disposable += selectedCategory.asObservable()
                 .map { mainViewModel.getOperators(OperatorCategory.valueOf(it)) }
                 .subscribe({ operators ->
-                    cardPagerAdapter = CardPagerAdapter()
-                    cardPagerAdapter.addOperators(operators)
-                    viewPager.adapter = cardPagerAdapter
+                    if (!::cardPagerAdapter.isInitialized) {
+                        cardPagerAdapter = CardPagerAdapter()
+                        cardPagerAdapter.addOperators(operators)
+                        viewPager.adapter = cardPagerAdapter
+                    } else {
+                        cardPagerAdapter.addOperators(operators)
+                        cardPagerAdapter.notifyDataSetChanged()
+                    }
                 }, { showError(it) })
 
         disposable += RxViewPager.pageSelections(viewPager)
@@ -67,7 +71,13 @@ class RxAnimeActivity : AppCompatActivity() {
 
                         }
                         OperatorCategory.TRANSFORM -> {
-
+                            val operatorList = mainViewModel.getOperators(OperatorCategory.TRANSFORM)
+                            val currentOperator = viewPager.findViewWithTag<BaseView>(operatorList[position].getOperatorName())
+                            currentOperator?.let {
+                                lifecycleScope.launch {
+                                    currentOperator.restart()
+                                }
+                            }
                         }
                     }
                 }, { showError(it) })
@@ -85,6 +95,7 @@ class RxAnimeActivity : AppCompatActivity() {
      * @param it Throwable to get the error message.
      */
     private fun showError(it: Throwable) {
+        it.printStackTrace()
         Toast.makeText(this, "Error: " + it.message, Toast.LENGTH_SHORT).show()
     }
 
